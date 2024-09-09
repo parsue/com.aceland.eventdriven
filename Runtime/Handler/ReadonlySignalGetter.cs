@@ -38,7 +38,8 @@ namespace AceLand.EventDriven.Handler
                 switch (arg)
                 {
                     case 0:
-                        OnSuccess?.Invoke(signal);
+                        var readonlySignal = new ReadonlySignal<T>(signal);
+                        OnSuccess?.Invoke(readonlySignal);
                         break;
                     case 1:
                         var msg = ErrorMessage.Builder()

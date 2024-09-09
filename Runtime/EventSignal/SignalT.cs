@@ -7,12 +7,13 @@ using AceLand.Library.Optional;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public class Signal : DisposableObject, ISignal
+    public class Signal<T> : DisposableObject, ISignal<T>
     {
-        private Signal(string id, Observers observers)
+        private Signal(string id, Observers<T> observers, T value)
         {
             Id = id;
             _observers = observers;
+            _value = value;
         }
 
         #region Builder
@@ -21,22 +22,24 @@ namespace AceLand.EventDriven.EventSignal
         
         public interface ISignalBuilder
         {
-            Signal Build();
+            Signal<T> Build();
             ISignalBuilder WithId(string id);
-            ISignalBuilder WithListener(Action listener);
-            ISignalBuilder WithListeners(params Action[] listeners);
+            ISignalBuilder WithValue(T value);
+            ISignalBuilder WithListener(Action<T> listener);
+            ISignalBuilder WithListeners(params Action<T>[] listeners);
         }
 
         private class SignalBuilder : ISignalBuilder
         {
             private Option<string> _id = Option<string>.None();
-            private readonly List<Action> _listeners = new();
+            private readonly List<Action<T>> _listeners = new();
+            private T _value;
 
-            public Signal Build()
+            public Signal<T> Build()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
-                var observers = new Observers(_listeners.ToArray());
-                var signal = new Signal(id, observers);
+                var observers = new Observers<T>(_listeners.ToArray());
+                var signal = new Signal<T>(id, observers, _value);
                 Signals.RegistrySignal(signal);
                 return signal;
             }
@@ -47,13 +50,19 @@ namespace AceLand.EventDriven.EventSignal
                 return this;
             }
 
-            public ISignalBuilder WithListener(Action listener)
+            public ISignalBuilder WithValue(T value)
+            {
+                _value = value;
+                return this;
+            }
+
+            public ISignalBuilder WithListener(Action<T> listener)
             {
                 _listeners.Add(listener);
                 return this;
             }
 
-            public ISignalBuilder WithListeners(params Action[] listeners)
+            public ISignalBuilder WithListeners(params Action<T>[] listeners)
             {
                 _listeners.AddRange(listeners);
                 return this;
@@ -62,24 +71,35 @@ namespace AceLand.EventDriven.EventSignal
 
         #endregion
         
-        public static SignalGetter<Signal> Get(string id) => new (id); 
+        public static SignalGetter<T> Get(string id) => new (id); 
+        public static ReadonlySignalGetter<T> GetReadonly(string id) => new (id); 
         
         public string Id { get; }
-        private readonly Observers _observers;
-
+        private readonly Observers<T> _observers;
+        private T _value;
+        public T Value
+        {
+            get => _value;
+            set
+            {
+                _value = value;
+                Trigger();
+            }
+        }
+        
         protected override void DisposeManagedResources()
         {
             Signals.UnRegistrySignal(this);
             _observers.Dispose();
         }
 
-        public void AddListener(Action listener) =>
+        public void AddListener(Action<T> listener) =>
             _observers.AddListener(listener);
 
-        public void RemoveListener(Action listener) =>
+        public void RemoveListener(Action<T> listener) =>
             _observers.RemoveListener(listener);
 
-        public void Trigger() => 
-            _observers.Trigger();
+        private void Trigger() => 
+            _observers.Trigger(Value);
     }
 }
