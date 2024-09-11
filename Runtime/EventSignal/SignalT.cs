@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.EventDriven.Handler;
 using AceLand.Library.Disposable;
 using AceLand.Library.Optional;
+using AceLand.TaskUtils;
+using AceLand.TaskUtils.PromiseAwaiter;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -70,9 +73,55 @@ namespace AceLand.EventDriven.EventSignal
         }
 
         #endregion
+
+        #region Getter
+
+        public static Promise<Signal<T>> Get(string id) => GetSignal(id); 
+        public static Promise<ReadonlySignal<T>> GetReadonly(string id) => GetReadonlySignal(id);
+
+        private static async UniTask<Signal<T>> GetSignal(string id)
+        {
+            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
+            var aliveToken = TaskHandler.ApplicationAliveToken;
+            
+            while (Time.realtimeSinceStartup < targetTime)
+            {
+                await UniTask.Yield();
+                var arg = Signals.TryGetSignal(id, out Signal<T> signal);
+                switch (arg)
+                {
+                    case 0:
+                        return signal;
+                    case 2:
+                        throw new Exception($"Get Signal [{id}] fail: wrong type");
+                }
+            }
+            
+            throw new Exception($"Signal [{id}] is not found");
+        }
         
-        public static SignalGetter<T> Get(string id) => new (id); 
-        public static ReadonlySignalGetter<T> GetReadonly(string id) => new (id); 
+        private static async UniTask<ReadonlySignal<T>> GetReadonlySignal(string id)
+        {
+            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
+            var aliveToken = TaskHandler.ApplicationAliveToken;
+            
+            while (Time.realtimeSinceStartup < targetTime)
+            {
+                await UniTask.Yield();
+                var arg = Signals.TryGetSignal(id, out Signal<T> signal);
+                switch (arg)
+                {
+                    case 0:
+                        return new ReadonlySignal<T>(signal);
+                    case 2:
+                        throw new Exception($"Get Signal [{id}] fail: wrong type");
+                }
+            }
+            
+            throw new Exception($"Signal [{id}] is not found");
+        }
+
+        #endregion
         
         public string Id { get; }
         private readonly Observers<T> _observers;

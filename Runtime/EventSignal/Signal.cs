@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.EventDriven.Handler;
 using AceLand.Library.Disposable;
 using AceLand.Library.Optional;
+using AceLand.TaskUtils;
+using AceLand.TaskUtils.PromiseAwaiter;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -61,8 +64,33 @@ namespace AceLand.EventDriven.EventSignal
         }
 
         #endregion
-        
-        public static SignalGetter<Signal> Get(string id) => new (id); 
+
+        #region Getter
+
+        public static Promise<Signal> Get(string id) => GetSignal(id); 
+
+        private static async UniTask<Signal> GetSignal(string id)
+        {
+            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
+            var aliveToken = TaskHandler.ApplicationAliveToken;
+            
+            while (Time.realtimeSinceStartup < targetTime)
+            {
+                await UniTask.Yield();
+                var arg = Signals.TryGetSignal(id, out Signal signal);
+                switch (arg)
+                {
+                    case 0:
+                        return signal;
+                    case 2:
+                        throw new Exception($"Get Signal [{id}] fail: wrong type");
+                }
+            }
+            
+            throw new Exception($"Signal [{id}] is not found");
+        }
+
+        #endregion
         
         public string Id { get; }
         private readonly Observers _observers;
