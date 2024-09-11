@@ -101,5 +101,7 @@ namespace AceLand.EventDriven.EventSignal
 
         private void Trigger() => 
             _observers.Trigger(Value);
+            
+        public static implicit operator T(Signal<T> signal) => signal.Value;
     }
 }
