@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using AceLand.EventDriven.EventSignal.Core;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public class ReadonlySignal<T> : IReadonlySignal<T>
+    public class ReadonlySignal<T> : IReadonlySignal<T>,
+        IComparable<Signal<T>>, IComparable<ReadonlySignal<T>>, IComparable<T>,
+        IEquatable<Signal<T>>, IEquatable<ReadonlySignal<T>>, IEquatable<T>
     {
         internal ReadonlySignal(Signal<T> refSignal) =>
             _refSignal = refSignal;
@@ -18,6 +21,26 @@ namespace AceLand.EventDriven.EventSignal
 
         public void RemoveListener(Action<T> listener) =>
             _refSignal.RemoveListener(listener);
+
+        public override string ToString() => Value.ToString();
+        
+        public bool Equals(T other) => 
+            Comparer<T>.Default.Compare(Value, other) == 0;
+
+        public bool Equals(Signal<T> other) => 
+            other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
+
+        public bool Equals(ReadonlySignal<T> other) => 
+            other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
+
+        public int CompareTo(Signal<T> other) =>
+            other == null ? 1 : Comparer<T>.Default.Compare(Value, other.Value);
+
+        public int CompareTo(ReadonlySignal<T> other) =>
+            other == null ? 1 : Comparer<T>.Default.Compare(Value, other.Value);
+
+        public int CompareTo(T other) =>
+            other == null ? 1 : Comparer<T>.Default.Compare(Value, other);
 
         public static implicit operator T(ReadonlySignal<T> signal) => signal.Value;
     }

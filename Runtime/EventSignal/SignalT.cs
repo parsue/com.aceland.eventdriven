@@ -10,7 +10,9 @@ using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public class Signal<T> : DisposableObject, ISignal<T>
+    public class Signal<T> : DisposableObject, ISignal<T>,
+        IComparable<Signal<T>>, IComparable<ReadonlySignal<T>>, IComparable<T>,
+        IEquatable<Signal<T>>, IEquatable<ReadonlySignal<T>>, IEquatable<T>
     {
         private Signal(string id, Observers<T> observers, T value)
         {
@@ -150,6 +152,26 @@ namespace AceLand.EventDriven.EventSignal
 
         private void Trigger() => 
             _observers.Trigger(Value);
+
+        public override string ToString() => Value.ToString();
+
+        public bool Equals(T other) => 
+            Comparer<T>.Default.Compare(Value, other) == 0;
+
+        public bool Equals(Signal<T> other) => 
+            other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
+
+        public bool Equals(ReadonlySignal<T> other) => 
+            other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
+
+        public int CompareTo(Signal<T> other) =>
+            other == null ? 1 : Comparer<T>.Default.Compare(Value, other.Value);
+
+        public int CompareTo(ReadonlySignal<T> other) =>
+            other == null ? 1 : Comparer<T>.Default.Compare(Value, other.Value);
+
+        public int CompareTo(T other) =>
+            other == null ? 1 : Comparer<T>.Default.Compare(Value, other);
             
         public static implicit operator T(Signal<T> signal) => signal.Value;
     }
