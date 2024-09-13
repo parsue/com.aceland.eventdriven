@@ -14,11 +14,12 @@ namespace AceLand.EventDriven.EventSignal
         IComparable<Signal<T>>, IComparable<ReadonlySignal<T>>, IComparable<T>,
         IEquatable<Signal<T>>, IEquatable<ReadonlySignal<T>>, IEquatable<T>
     {
-        private Signal(string id, Observers<T> observers, T value)
+        private Signal(string id, Observers<T> observers, T value, bool readonlyToObserver)
         {
             Id = id;
             _observers = observers;
             _value = value;
+            _readonlyToObserver = _readonlyToObserver;
         }
 
         #region Builder
@@ -32,6 +33,7 @@ namespace AceLand.EventDriven.EventSignal
             ISignalBuilder WithValue(T value);
             ISignalBuilder WithListener(Action<T> listener);
             ISignalBuilder WithListeners(params Action<T>[] listeners);
+            ISignalBuilder ReadonlyToObserver(bool readonlyToObserver);
         }
 
         private class SignalBuilder : ISignalBuilder
@@ -39,12 +41,13 @@ namespace AceLand.EventDriven.EventSignal
             private Option<string> _id = Option<string>.None();
             private readonly List<Action<T>> _listeners = new();
             private T _value;
+            private bool _readonlyToObserver;
 
             public Signal<T> Build()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
                 var observers = new Observers<T>(_listeners.ToArray());
-                var signal = new Signal<T>(id, observers, _value);
+                var signal = new Signal<T>(id, observers, _value, _readonlyToObserver);
                 Signals.RegistrySignal(signal);
                 return signal;
             }
@@ -72,6 +75,12 @@ namespace AceLand.EventDriven.EventSignal
                 _listeners.AddRange(listeners);
                 return this;
             }
+
+            public ISignalBuilder ReadonlyToObserver(bool readonlyToObserver)
+            {
+                _readonlyToObserver = readonlyToObserver;
+                return this;
+            }
         }
 
         #endregion
@@ -93,6 +102,9 @@ namespace AceLand.EventDriven.EventSignal
                 switch (arg)
                 {
                     case 0:
+                        if (signal._readonlyToObserver)
+                            throw new Exception($"Get Signal [{id}] fail: marked as Readonly to Observer.  Please use GetReadonly");
+                        
                         return signal;
                     case 2:
                         throw new Exception($"Get Signal [{id}] fail: wrong type");
@@ -128,6 +140,8 @@ namespace AceLand.EventDriven.EventSignal
         public string Id { get; }
         private readonly Observers<T> _observers;
         private T _value;
+        private readonly bool _readonlyToObserver;
+        
         public T Value
         {
             get => _value;
