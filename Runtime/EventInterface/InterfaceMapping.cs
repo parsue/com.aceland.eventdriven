@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using AceLand.EventDriven.ProjectSetting;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -20,7 +20,7 @@ namespace AceLand.EventDriven.EventInterface
             Debug.Log("Interface Mapping Initializing ...");
             _interfaceComponentsMapping = new Dictionary<Type, Type[]>();
             
-            await UniTask.RunOnThreadPool(() =>
+            await Task.Run(() =>
             {
                 var typesSpan = GetAllTypesFromAssemblies();
                 foreach (var type in typesSpan)

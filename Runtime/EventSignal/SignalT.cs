@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Disposable;
 using AceLand.Library.Optional;
 using AceLand.TaskUtils;
 using AceLand.TaskUtils.PromiseAwaiter;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
@@ -19,7 +19,7 @@ namespace AceLand.EventDriven.EventSignal
             Id = id;
             _observers = observers;
             _value = value;
-            _readonlyToObserver = _readonlyToObserver;
+            _readonlyToObserver = readonlyToObserver;
         }
 
         #region Builder
@@ -90,49 +90,64 @@ namespace AceLand.EventDriven.EventSignal
         public static Promise<Signal<T>> Get(string id) => GetSignal(id); 
         public static Promise<ReadonlySignal<T>> GetReadonly(string id) => GetReadonlySignal(id);
 
-        private static async UniTask<Signal<T>> GetSignal(string id)
+        private static async Task<Signal<T>> GetSignal(string id)
         {
             var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
             var aliveToken = TaskHandler.ApplicationAliveToken;
+            string msg;
             
             while (Time.realtimeSinceStartup < targetTime)
             {
-                await UniTask.Yield();
+                await Task.Yield();
+                if (aliveToken.IsCancellationRequested) return null;
+                
                 var arg = Signals.TryGetSignal(id, out Signal<T> signal);
                 switch (arg)
                 {
                     case 0:
-                        if (signal._readonlyToObserver)
-                            throw new Exception($"Get Signal [{id}] fail: marked as Readonly to Observer.  Please use GetReadonly");
-                        
-                        return signal;
+                        if (!signal._readonlyToObserver) return signal;
+                        msg = $"Get Signal [{id}] fail: marked as Readonly to Observer.  Please use GetReadonly";
+                        Debug.LogError(msg);
+                        throw new Exception(msg);
+                    
                     case 2:
-                        throw new Exception($"Get Signal [{id}] fail: wrong type");
+                        msg = $"Get Signal [{id}] fail: wrong type";
+                        Debug.LogError(msg);
+                        throw new Exception(msg);
                 }
             }
             
-            throw new Exception($"Signal [{id}] is not found");
+            msg = $"Signal [{id}] is not found";
+            Debug.LogError(msg);
+            throw new Exception(msg);
         }
         
-        private static async UniTask<ReadonlySignal<T>> GetReadonlySignal(string id)
+        private static async Task<ReadonlySignal<T>> GetReadonlySignal(string id)
         {
             var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
             var aliveToken = TaskHandler.ApplicationAliveToken;
+            string msg;
             
             while (Time.realtimeSinceStartup < targetTime)
             {
-                await UniTask.Yield();
+                await Task.Yield();
+                if (aliveToken.IsCancellationRequested) break;
+                
                 var arg = Signals.TryGetSignal(id, out Signal<T> signal);
                 switch (arg)
                 {
                     case 0:
                         return new ReadonlySignal<T>(signal);
                     case 2:
-                        throw new Exception($"Get Signal [{id}] fail: wrong type");
+                        msg = $"Get Signal [{id}] fail: wrong type";
+                        Debug.LogError(msg);
+                        throw new Exception(msg);
                 }
             }
             
-            throw new Exception($"Signal [{id}] is not found");
+            msg = $"Signal [{id}] is not found";
+            Debug.LogError(msg);
+            throw new Exception(msg);
         }
 
         #endregion
