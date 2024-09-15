@@ -22,6 +22,8 @@ namespace AceLand.EventDriven.EventSignal
             _readonlyToObserver = readonlyToObserver;
         }
 
+        ~Signal() => Dispose(false);
+
         #region Builder
 
         public static ISignalBuilder Builder() => new SignalBuilder();

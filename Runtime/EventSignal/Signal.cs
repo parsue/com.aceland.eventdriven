@@ -18,6 +18,8 @@ namespace AceLand.EventDriven.EventSignal
             _observers = observers;
         }
 
+        ~Signal() => Dispose(false);
+
         #region Builder
 
         public static ISignalBuilder Builder() => new SignalBuilder();
