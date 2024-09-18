@@ -2,7 +2,6 @@
     "name": "AceLand.EventDriven",
     "rootNamespace": "AceLand.EventDriven",
     "references": [
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:0b6e3ff925df76b408774ed4b623807b",
         "GUID:1a972ba99344f904a9d50dc99b31faba"
     ],
