@@ -109,18 +109,15 @@ namespace AceLand.EventDriven.EventSignal
                     case 0:
                         if (!signal._readonlyToObserver) return signal;
                         msg = $"Get Signal [{id}] fail: marked as Readonly to Observer.  Please use GetReadonly";
-                        Debug.LogError(msg);
                         throw new Exception(msg);
                     
                     case 2:
                         msg = $"Get Signal [{id}] fail: wrong type";
-                        Debug.LogError(msg);
                         throw new Exception(msg);
                 }
             }
             
             msg = $"Signal [{id}] is not found";
-            Debug.LogError(msg);
             throw new Exception(msg);
         }
         
@@ -133,7 +130,7 @@ namespace AceLand.EventDriven.EventSignal
             while (Time.realtimeSinceStartup < targetTime)
             {
                 await Task.Yield();
-                if (aliveToken.IsCancellationRequested) break;
+                if (aliveToken.IsCancellationRequested) return null;
                 
                 var arg = Signals.TryGetSignal(id, out Signal<T> signal);
                 switch (arg)
@@ -142,13 +139,11 @@ namespace AceLand.EventDriven.EventSignal
                         return new ReadonlySignal<T>(signal);
                     case 2:
                         msg = $"Get Signal [{id}] fail: wrong type";
-                        Debug.LogError(msg);
                         throw new Exception(msg);
                 }
             }
             
             msg = $"Signal [{id}] is not found";
-            Debug.LogError(msg);
             throw new Exception(msg);
         }
 

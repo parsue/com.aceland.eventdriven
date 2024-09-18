@@ -11,7 +11,7 @@ namespace AceLand.EventDriven.EventSignal
         internal ReadonlySignal(Signal<T> refSignal) =>
             _refSignal = refSignal;
 
-        public string Id => _refSignal?.Id ?? null;
+        public string Id => _refSignal.Id;
         public T Value => _refSignal.Value ?? default;
 
         private readonly Signal<T> _refSignal;

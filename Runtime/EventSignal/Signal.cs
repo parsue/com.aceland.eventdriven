@@ -75,6 +75,7 @@ namespace AceLand.EventDriven.EventSignal
         {
             var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
             var aliveToken = TaskHandler.ApplicationAliveToken;
+            string msg;
             
             while (Time.realtimeSinceStartup < targetTime)
             {
@@ -87,11 +88,13 @@ namespace AceLand.EventDriven.EventSignal
                     case 0:
                         return signal;
                     case 2:
-                        throw new Exception($"Get Signal [{id}] fail: wrong type");
+                        msg = $"Get Signal [{id}] fail: wrong type";
+                        throw new Exception(msg);
                 }
             }
-            
-            throw new Exception($"Signal [{id}] is not found");
+
+            msg = $"Signal [{id}] is not found";
+            throw new Exception(msg);
         }
 
         #endregion
