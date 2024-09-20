@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Disposable;
 using AceLand.Library.Optional;
+using AceLand.Library.Utils;
 using AceLand.TaskUtils;
 using AceLand.TaskUtils.PromiseAwaiter;
 using UnityEngine;
@@ -73,14 +74,14 @@ namespace AceLand.EventDriven.EventSignal
 
         private static async Task<Signal> GetSignal(string id)
         {
-            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
+            var startTime = DateTime.Now;
+            var timeout = EventDrivenHelper.Settings.SignalGetterTimeout;
             var aliveToken = TaskHandler.ApplicationAliveToken;
             string msg;
             
-            while (Time.realtimeSinceStartup < targetTime)
+            while (!aliveToken.IsCancellationRequested && (DateTime.Now - startTime).TotalSeconds < timeout)
             {
                 await Task.Yield();
-                if (aliveToken.IsCancellationRequested) return null;
                 
                 var arg = Signals.TryGetSignal(id, out Signal signal);
                 switch (arg)
