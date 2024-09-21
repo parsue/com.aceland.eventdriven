@@ -34,7 +34,7 @@ namespace AceLand.EventDriven.EventSignal
             ISignalBuilder WithValue(T value);
             ISignalBuilder WithListener(Action<T> listener);
             ISignalBuilder WithListeners(params Action<T>[] listeners);
-            ISignalBuilder ReadonlyToObserver(bool readonlyToObserver);
+            ISignalBuilder ReadonlyToObserver();
         }
 
         private class SignalBuilder : ISignalBuilder
@@ -77,9 +77,9 @@ namespace AceLand.EventDriven.EventSignal
                 return this;
             }
 
-            public ISignalBuilder ReadonlyToObserver(bool readonlyToObserver)
+            public ISignalBuilder ReadonlyToObserver()
             {
-                _readonlyToObserver = readonlyToObserver;
+                _readonlyToObserver = true;
                 return this;
             }
         }
@@ -106,7 +106,10 @@ namespace AceLand.EventDriven.EventSignal
                 switch (arg)
                 {
                     case 0:
-                        return signal;
+                        if (!signal._readonlyToObserver) return signal;
+                        msg = $"Get Signal [{id}] fail: marked as Readonly To Observer.  Use GetReadonly instead.";
+                        throw new Exception(msg);
+                        
                     case 2:
                         msg = $"Get Signal [{id}] fail: wrong type";
                         throw new Exception(msg);
