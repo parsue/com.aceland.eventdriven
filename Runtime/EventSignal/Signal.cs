@@ -4,10 +4,8 @@ using System.Threading.Tasks;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Disposable;
 using AceLand.Library.Optional;
-using AceLand.Library.Utils;
 using AceLand.TaskUtils;
 using AceLand.TaskUtils.PromiseAwaiter;
-using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -76,7 +74,7 @@ namespace AceLand.EventDriven.EventSignal
         {
             var startTime = DateTime.Now;
             var timeout = EventDrivenHelper.Settings.SignalGetterTimeout;
-            var aliveToken = TaskHandler.ApplicationAliveToken;
+            var aliveToken = TaskHelper.ApplicationAliveToken;
             string msg;
             
             while (!aliveToken.IsCancellationRequested && (DateTime.Now - startTime).TotalSeconds < timeout)
