@@ -6,12 +6,11 @@ using AceLand.Library.Disposable;
 using AceLand.Library.Optional;
 using AceLand.TaskUtils;
 using AceLand.TaskUtils.PromiseAwaiter;
+using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public class Signal<T> : DisposableObject, ISignal<T>,
-        IComparable<Signal<T>>, IComparable<ReadonlySignal<T>>, IComparable<T>,
-        IEquatable<Signal<T>>, IEquatable<ReadonlySignal<T>>, IEquatable<T>
+    public class Signal<T> : DisposableObject, ISignal<T>
     {
         private Signal(string id, Observers<T> observers, T value, bool readonlyToObserver)
         {
@@ -31,6 +30,7 @@ namespace AceLand.EventDriven.EventSignal
         {
             Signal<T> Build();
             ISignalBuilder WithId(string id);
+            ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
             ISignalBuilder WithValue(T value);
             ISignalBuilder WithListener(Action<T> listener);
             ISignalBuilder WithListeners(params Action<T>[] listeners);
@@ -56,6 +56,12 @@ namespace AceLand.EventDriven.EventSignal
             public ISignalBuilder WithId(string id)
             {
                 _id = id.ToOption();
+                return this;
+            }
+
+            public ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum
+            {
+                _id = id.ToString().ToOption();
                 return this;
             }
 
@@ -88,17 +94,22 @@ namespace AceLand.EventDriven.EventSignal
 
         #region Getter
 
-        public static Promise<Signal<T>> Get(string id) => GetSignal(id); 
-        public static Promise<ReadonlySignal<T>> GetReadonly(string id) => GetReadonlySignal(id);
+        public static Promise<Signal<T>> Get(string id) =>
+            GetSignal(id); 
+        public static Promise<Signal<T>> Get<TEnum>(TEnum id) where TEnum: Enum =>
+            GetSignal(id.ToString()); 
+        public static Promise<ReadonlySignal<T>> GetReadonly(string id) =>
+            GetReadonlySignal(id);
+        public static Promise<ReadonlySignal<T>> GetReadonly<TEnum>(TEnum id) where TEnum: Enum =>
+            GetReadonlySignal(id.ToString());
 
         private static async Task<Signal<T>> GetSignal(string id)
         {
-            var startTime = DateTime.Now;
-            var timeout = EventDrivenHelper.Settings.SignalGetterTimeout;
             var aliveToken = TaskHelper.ApplicationAliveToken;
+            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
             string msg;
-            
-            while (!aliveToken.IsCancellationRequested && (DateTime.Now - startTime).TotalSeconds < timeout)
+
+            while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
             {
                 await Task.Yield();
                 
@@ -107,9 +118,10 @@ namespace AceLand.EventDriven.EventSignal
                 {
                     case 0:
                         if (!signal._readonlyToObserver) return signal;
-                        msg = $"Get Signal [{id}] fail: marked as Readonly To Observer.  Use GetReadonly instead.";
+                        msg =
+                            $"Get Signal [{id}] fail: marked as Readonly To Observer.  Use GetReadonly instead.";
                         throw new Exception(msg);
-                        
+
                     case 2:
                         msg = $"Get Signal [{id}] fail: wrong type";
                         throw new Exception(msg);
@@ -122,12 +134,10 @@ namespace AceLand.EventDriven.EventSignal
         
         private static async Task<ReadonlySignal<T>> GetReadonlySignal(string id)
         {
-            var startTime = DateTime.Now;
-            var timeout = EventDrivenHelper.Settings.SignalGetterTimeout;
             var aliveToken = TaskHelper.ApplicationAliveToken;
-            string msg;
-            
-            while (!aliveToken.IsCancellationRequested && (DateTime.Now - startTime).TotalSeconds < timeout)
+            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
+    
+            while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
             {
                 await Task.Yield();
                 
@@ -137,13 +147,11 @@ namespace AceLand.EventDriven.EventSignal
                     case 0:
                         return new ReadonlySignal<T>(signal);
                     case 2:
-                        msg = $"Get Signal [{id}] fail: wrong type";
-                        throw new Exception(msg);
+                        throw new Exception($"Get Signal [{id}] fail: wrong type");
                 }
             }
-            
-            msg = $"Signal [{id}] is not found";
-            throw new Exception(msg);
+    
+            throw new Exception($"Signal [{id}] is not found");
         }
 
         #endregion
@@ -179,24 +187,15 @@ namespace AceLand.EventDriven.EventSignal
             _observers.Trigger(Value);
 
         public override string ToString() => Value.ToString();
-
-        public bool Equals(T other) => 
-            Comparer<T>.Default.Compare(Value, other) == 0;
-
-        public bool Equals(Signal<T> other) => 
+        
+        public bool CompareTo(T other) => 
+            other != null && Comparer<T>.Default.Compare(Value, other) == 0;
+        
+        public bool CompareTo(Signal<T> other) => 
             other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
 
-        public bool Equals(ReadonlySignal<T> other) => 
+        public bool CompareTo(ReadonlySignal<T> other) => 
             other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
-
-        public int CompareTo(Signal<T> other) =>
-            other == null ? 1 : Comparer<T>.Default.Compare(Value, other.Value);
-
-        public int CompareTo(ReadonlySignal<T> other) =>
-            other == null ? 1 : Comparer<T>.Default.Compare(Value, other.Value);
-
-        public int CompareTo(T other) =>
-            other == null ? 1 : Comparer<T>.Default.Compare(Value, other);
             
         public static implicit operator T(Signal<T> signal) => signal.Value;
     }

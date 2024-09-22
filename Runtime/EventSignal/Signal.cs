@@ -6,6 +6,7 @@ using AceLand.Library.Disposable;
 using AceLand.Library.Optional;
 using AceLand.TaskUtils;
 using AceLand.TaskUtils.PromiseAwaiter;
+using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -27,6 +28,7 @@ namespace AceLand.EventDriven.EventSignal
         {
             Signal Build();
             ISignalBuilder WithId(string id);
+            ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
             ISignalBuilder WithListener(Action listener);
             ISignalBuilder WithListeners(params Action[] listeners);
         }
@@ -51,6 +53,12 @@ namespace AceLand.EventDriven.EventSignal
                 return this;
             }
 
+            public ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum
+            {
+                _id = id.ToString().ToOption();
+                return this;
+            }
+
             public ISignalBuilder WithListener(Action listener)
             {
                 _listeners.Add(listener);
@@ -68,20 +76,21 @@ namespace AceLand.EventDriven.EventSignal
 
         #region Getter
 
-        public static Promise<Signal> Get(string id) => GetSignal(id); 
+        public static Promise<Signal> Get(string id) => 
+            GetSignal(id); 
+        public static Promise<Signal> Get<TEnum>(TEnum id) where TEnum: Enum =>
+            GetSignal(id.ToString()); 
 
         private static async Task<Signal> GetSignal(string id)
         {
-            var startTime = DateTime.Now;
-            var timeout = EventDrivenHelper.Settings.SignalGetterTimeout;
             var aliveToken = TaskHelper.ApplicationAliveToken;
+            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
             string msg;
-            
-            while (!aliveToken.IsCancellationRequested && (DateTime.Now - startTime).TotalSeconds < timeout)
+    
+            while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
             {
-                await Task.Yield();
-                
                 var arg = Signals.TryGetSignal(id, out Signal signal);
+                
                 switch (arg)
                 {
                     case 0:
@@ -90,6 +99,8 @@ namespace AceLand.EventDriven.EventSignal
                         msg = $"Get Signal [{id}] fail: wrong type";
                         throw new Exception(msg);
                 }
+
+                await Task.Yield();
             }
 
             msg = $"Signal [{id}] is not found";
