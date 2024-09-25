@@ -13,6 +13,9 @@ namespace AceLand.EventDriven.Editor.ProjectSettingsProvider
         private InterfaceMappingSettingsProvider(string path, SettingsScope scope = SettingsScope.User) 
             : base(path, scope) { }
         
+        [InitializeOnLoadMethod]
+        public static void CreateSettings() => EventDrivenSettings.GetSerializedSettings();
+        
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             _settings = EventDrivenSettings.GetSerializedSettings();
