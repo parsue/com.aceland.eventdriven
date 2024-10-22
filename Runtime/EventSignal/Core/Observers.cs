@@ -21,7 +21,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         private event Action Listeners;
 
         public void AddListener(Action listener) => Listeners += listener;
-        public void RemoveListener(Action listener) => Listeners += listener;
+        public void RemoveListener(Action listener) => Listeners -= listener;
 
         public void Trigger()
         {
@@ -47,7 +47,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         private event Action<T> Listeners;
 
         public void AddListener(Action<T> listener) => Listeners += listener;
-        public void RemoveListener(Action<T> listener) => Listeners += listener;
+        public void RemoveListener(Action<T> listener) => Listeners -= listener;
 
         public void Trigger(in T value)
         {
