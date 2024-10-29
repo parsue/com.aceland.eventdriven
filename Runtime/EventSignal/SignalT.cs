@@ -183,7 +183,7 @@ namespace AceLand.EventDriven.EventSignal
         public void RemoveListener(Action<T> listener) =>
             _observers.RemoveListener(listener);
 
-        private void Trigger() => 
+        public void Trigger() => 
             _observers.Trigger(Value);
 
         public override string ToString() => Value.ToString();
