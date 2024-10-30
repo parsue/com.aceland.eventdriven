@@ -19,8 +19,16 @@ namespace AceLand.EventDriven.EventInterface
         {
             Debug.Log("Interface Mapping Initializing ...");
             _interfaceComponentsMapping = new Dictionary<Type, Type[]>();
+
+            await SetupMapping();
             
-            await Task.Run(() =>
+            Initialized = true;
+            Debug.Log("Interface Mapping Initialized");
+        }
+
+        private static Task SetupMapping()
+        {
+            return Task.Run(() =>
             {
                 var typesSpan = GetAllTypesFromAssemblies();
                 foreach (var type in typesSpan)
@@ -45,9 +53,6 @@ namespace AceLand.EventDriven.EventInterface
                     _interfaceComponentsMapping.Add(type, componentsList.ToArray());
                 }
             });
-            
-            Initialized = true;
-            Debug.Log("Interface Mapping Initialized");
         }
 
         private static bool IsAcceptedType(string typeName)
