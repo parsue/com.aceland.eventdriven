@@ -9,7 +9,7 @@ namespace AceLand.EventDriven
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void Initialization()
         {
-            EventDrivenHelper.Settings = Resources.Load<EventDrivenSettings>(nameof(EventDrivenSettings));
+            Events.Settings = Resources.Load<EventDrivenSettings>(nameof(EventDrivenSettings));
             
             InterfaceMapping.InitInterfaceToComponentMapping();
         }

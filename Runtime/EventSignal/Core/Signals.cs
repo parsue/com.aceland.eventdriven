@@ -6,7 +6,7 @@ namespace AceLand.EventDriven.EventSignal.Core
 {
     internal static class Signals
     {
-        private static EventDrivenSettings Settings => EventDrivenHelper.Settings;
+        private static EventDrivenSettings Settings => Events.Settings;
         private static readonly Dictionary<string, ISignal> SignalsById = new();
         
         internal static int TryGetSignal<T>(string id, out T signal)

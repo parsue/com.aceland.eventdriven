@@ -12,7 +12,7 @@ namespace AceLand.EventDriven.EventInterface
     {
         public static bool Initialized { get; private set; }
 
-        private static EventDrivenSettings Settings => EventDrivenHelper.Settings;
+        private static EventDrivenSettings Settings => Events.Settings;
         private static Dictionary<Type, Type[]> _interfaceComponentsMapping;
 
         internal static async void InitInterfaceToComponentMapping()

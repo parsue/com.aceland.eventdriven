@@ -22,7 +22,7 @@ namespace AceLand.EventDriven.EventSignal
         private static async Task<Signal<T>> GetSignal(string id)
         {
             var aliveToken = TaskHelper.ApplicationAliveToken;
-            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
+            var targetTime = Time.realtimeSinceStartup + Events.Settings.SignalGetterTimeout;
             string msg;
 
             while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
@@ -51,7 +51,7 @@ namespace AceLand.EventDriven.EventSignal
         private static async Task<ReadonlySignal<T>> GetReadonlySignal(string id)
         {
             var aliveToken = TaskHelper.ApplicationAliveToken;
-            var targetTime = Time.realtimeSinceStartup + EventDrivenHelper.Settings.SignalGetterTimeout;
+            var targetTime = Time.realtimeSinceStartup + Events.Settings.SignalGetterTimeout;
     
             while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
             {

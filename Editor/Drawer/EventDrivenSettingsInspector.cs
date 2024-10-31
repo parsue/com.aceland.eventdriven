@@ -1,11 +1,11 @@
-using AceLand.Library.Editor;
 using AceLand.EventDriven.ProjectSetting;
+using AceLand.Library.Editor;
 using UnityEditor;
 
-namespace Editor.Drawer
+namespace AceLand.EventDriven.Editor.Drawer
 {
     [CustomEditor(typeof(EventDrivenSettings))]
-    public class InterfaceMappingSettingsInspector : UnityEditor.Editor
+    public class EventDrivenSettingsInspector : UnityEditor.Editor
     {        
         public override void OnInspectorGUI()
         {
