@@ -8,11 +8,16 @@ namespace AceLand.EventDriven.EventSignal
         public string Id { get; }
         private readonly Observers _observers;
 
-        public void AddListener(Action listener) =>
+        public void AddListener(Action listener, bool runImmediately = false)
+        {
             _observers.AddListener(listener);
+            if (runImmediately) listener?.Invoke();
+        }
 
-        public void RemoveListener(Action listener) =>
+        public void RemoveListener(Action listener)
+        {
             _observers.RemoveListener(listener);
+        }
 
         public void Trigger() => 
             _observers.Trigger();

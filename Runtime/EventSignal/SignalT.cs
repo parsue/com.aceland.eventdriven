@@ -21,11 +21,16 @@ namespace AceLand.EventDriven.EventSignal
             }
         }
 
-        public void AddListener(Action<T> listener) =>
+        public void AddListener(Action<T> listener, bool runImmediately = false)
+        {
             _observers.AddListener(listener);
+            if (runImmediately) listener?.Invoke(_value);
+        }
 
-        public void RemoveListener(Action<T> listener) =>
+        public void RemoveListener(Action<T> listener)
+        {
             _observers.RemoveListener(listener);
+        }
 
         public void Trigger() => 
             _observers.Trigger(Value);
