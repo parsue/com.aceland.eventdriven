@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using AceLand.EventDriven.Core;
 using AceLand.EventDriven.ProjectSetting;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -12,7 +13,7 @@ namespace AceLand.EventDriven.EventInterface
     {
         public static bool Initialized { get; private set; }
 
-        private static EventDrivenSettings Settings => Events.Settings;
+        private static EventDrivenSettings Settings => EventDrivenUtils.Settings;
         private static Dictionary<Type, Type[]> _interfaceComponentsMapping;
 
         internal static async void InitInterfaceToComponentMapping()

@@ -1,5 +1,4 @@
 using AceLand.EventDriven.EventInterface;
-using AceLand.EventDriven.ProjectSetting;
 using UnityEngine;
 
 namespace AceLand.EventDriven
@@ -9,8 +8,6 @@ namespace AceLand.EventDriven
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void Initialization()
         {
-            Events.Settings = Resources.Load<EventDrivenSettings>(nameof(EventDrivenSettings));
-            
             InterfaceMapping.InitInterfaceToComponentMapping();
         }
     }

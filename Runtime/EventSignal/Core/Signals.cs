@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using AceLand.EventDriven.Core;
 using AceLand.EventDriven.ProjectSetting;
 
 namespace AceLand.EventDriven.EventSignal.Core
 {
     internal static class Signals
     {
-        private static EventDrivenSettings Settings => Events.Settings;
+        private static EventDrivenSettings Settings => EventDrivenUtils.Settings;
         private static readonly Dictionary<string, ISignal> SignalsById = new();
         
         internal static int TryGetSignal<T>(string id, out T signal)
