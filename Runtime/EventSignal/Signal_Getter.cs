@@ -9,9 +9,9 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal
     {
-        public static Promise<Signal> Get(string id) => 
+        public static Task<Signal> Get(string id) => 
             GetSignal(id); 
-        public static Promise<Signal> Get<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Task<Signal> Get<TEnum>(TEnum id) where TEnum: Enum =>
             GetSignal(id.ToString()); 
 
         private static async Task<Signal> GetSignal(string id)

@@ -2,30 +2,28 @@
 using System.Threading.Tasks;
 using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.Library.Disposable;
 using AceLand.TaskUtils;
-using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal<T>
     {
-        public static Promise<Signal<T>> Get(string id) =>
+        public static Task<Signal<T>> Get(string id) =>
             GetSignal(id); 
-        public static Promise<Signal<T>> Get<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Task<Signal<T>> Get<TEnum>(TEnum id) where TEnum: Enum =>
             GetSignal(id.ToString()); 
-        public static Promise<ReadonlySignal<T>> GetReadonly(string id) =>
+        public static Task<ReadonlySignal<T>> GetReadonly(string id) =>
             GetReadonlySignal(id);
-        public static Promise<ReadonlySignal<T>> GetReadonly<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Task<ReadonlySignal<T>> GetReadonly<TEnum>(TEnum id) where TEnum: Enum =>
             GetReadonlySignal(id.ToString());
 
         private static async Task<Signal<T>> GetSignal(string id)
         {
             var aliveToken = Promise.ApplicationAliveToken;
-            var targetTime = Time.realtimeSinceStartup + EventDrivenUtils.Settings.SignalGetterTimeout;
+            var targetTime = DateTime.Now.AddSeconds(EventDrivenUtils.Settings.SignalGetterTimeout);
             string msg;
 
-            while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
+            while (!aliveToken.IsCancellationRequested && DateTime.Now < targetTime)
             {
                 await Task.Yield();
                 
@@ -51,9 +49,9 @@ namespace AceLand.EventDriven.EventSignal
         private static async Task<ReadonlySignal<T>> GetReadonlySignal(string id)
         {
             var aliveToken = Promise.ApplicationAliveToken;
-            var targetTime = Time.realtimeSinceStartup + EventDrivenUtils.Settings.SignalGetterTimeout;
+            var targetTime = DateTime.Now.AddSeconds(EventDrivenUtils.Settings.SignalGetterTimeout);
     
-            while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
+            while (!aliveToken.IsCancellationRequested && DateTime.Now < targetTime)
             {
                 await Task.Yield();
                 
