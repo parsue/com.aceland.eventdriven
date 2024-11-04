@@ -13,6 +13,7 @@ namespace AceLand.EventDriven.ProjectSetting
         [SerializeField] private bool swapSignalOnSameId;
         [SerializeField] private float signalGetterTimeout = 1.5f;
 
+        public int AcceptedNamespaceCount => acceptedNamespaces.Length;
         public ReadOnlySpan<string> AcceptedNamespaces => acceptedNamespaces;
 
         public bool SwapSignalOnSameId => swapSignalOnSameId;

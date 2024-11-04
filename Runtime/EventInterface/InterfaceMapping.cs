@@ -19,12 +19,18 @@ namespace AceLand.EventDriven.EventInterface
         internal static async void InitInterfaceToComponentMapping()
         {
             Debug.Log("Interface Mapping Initializing ...");
-            _interfaceComponentsMapping = new Dictionary<Type, Type[]>();
-
-            await SetupMapping();
+            if (Settings.AcceptedNamespaceCount > 0)
+            {
+                _interfaceComponentsMapping = new Dictionary<Type, Type[]>();
+                await SetupMapping();
+                Debug.Log("Interface Mapping Initialized");
+            }
+            else
+            {
+                Debug.LogWarning("Interface Mapping not initialized: no accepted namespace");
+            }
             
             Initialized = true;
-            Debug.Log("Interface Mapping Initialized");
         }
 
         private static Task SetupMapping()
@@ -87,6 +93,8 @@ namespace AceLand.EventDriven.EventInterface
         
         public static IEnumerable<T> FindObjects<T>() where T : class
         {
+            if (!Initialized) yield break;
+            
             var t = typeof(T);
             if (!t.IsInterface)
             {
@@ -114,6 +122,8 @@ namespace AceLand.EventDriven.EventInterface
 
         public static T FindObject<T>() where T : class
         {
+            if (!Initialized) return null;
+            
             var t = typeof(T);
             if (!t.IsInterface) return null;
             if (!_interfaceComponentsMapping.TryGetValue(t, out var types1)) return null;
@@ -125,6 +135,8 @@ namespace AceLand.EventDriven.EventInterface
 
         public static IEnumerable<T> GetInterfaceComponents<T>(this Component component) where T : class
         {
+            if (!Initialized) yield break;
+
             var t = typeof(T);
             if (!t.IsInterface)
             {
@@ -153,6 +165,8 @@ namespace AceLand.EventDriven.EventInterface
 
         public static T GetInterfaceComponent<T>(this Component component) where T : class
         {
+            if (!Initialized) return null;
+
             var t = typeof(T);
             if (!t.IsInterface) return null;
             if (!_interfaceComponentsMapping.TryGetValue(t, out var types1)) return null;
