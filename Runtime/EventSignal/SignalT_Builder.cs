@@ -17,7 +17,7 @@ namespace AceLand.EventDriven.EventSignal
             ISignalBuilder WithValue(T value);
             ISignalBuilder WithListener(Action<T> listener);
             ISignalBuilder WithListeners(params Action<T>[] listeners);
-            ISignalBuilder ReadonlyToObserver();
+            ISignalBuilder WithForceReadonly();
         }
 
         private class SignalBuilder : ISignalBuilder
@@ -25,13 +25,13 @@ namespace AceLand.EventDriven.EventSignal
             private Option<string> _id = Option<string>.None();
             private readonly List<Action<T>> _listeners = new();
             private T _value;
-            private bool _readonlyToObserver;
+            private bool _forceReadonly;
 
             public Signal<T> Build()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
                 var observers = new Observers<T>(_listeners.ToArray());
-                var signal = new Signal<T>(id, observers, _value, _readonlyToObserver);
+                var signal = new Signal<T>(id, observers, _value, _forceReadonly);
                 Signals.RegistrySignal(signal);
                 return signal;
             }
@@ -66,9 +66,9 @@ namespace AceLand.EventDriven.EventSignal
                 return this;
             }
 
-            public ISignalBuilder ReadonlyToObserver()
+            public ISignalBuilder WithForceReadonly()
             {
-                _readonlyToObserver = true;
+                _forceReadonly = true;
                 return this;
             }
         }

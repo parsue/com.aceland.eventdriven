@@ -9,10 +9,16 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal
     {
-        public static Task<Signal> Get(string id) => 
+        public static Task<Signal> GetAsync(string id) => 
             GetSignal(id); 
-        public static Task<Signal> Get<TEnum>(TEnum id) where TEnum: Enum =>
-            GetSignal(id.ToString()); 
+        public static Task<Signal> GetAsync<TEnum>(TEnum id) where TEnum: Enum =>
+            GetSignal(id.ToString());
+
+        public static Signal Get(string id) =>
+            Signals.TryGetSignal(id, out Signal signal) == 0 ? signal : null;
+
+        public static Signal Get<TEnum>(TEnum id) where TEnum: Enum =>
+            Get(id.ToString());
 
         private static async Task<Signal> GetSignal(string id)
         {

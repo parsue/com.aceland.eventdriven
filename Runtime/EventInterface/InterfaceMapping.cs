@@ -11,12 +11,12 @@ namespace AceLand.EventDriven.EventInterface
 {
     public static class InterfaceMapping
     {
-        public static bool Initialized { get; private set; }
-
         private static EventDrivenSettings Settings => EventDrivenUtils.Settings;
         private static Dictionary<Type, Type[]> _interfaceComponentsMapping;
+        
+        private static bool Initialized { get; set; }
 
-        internal static async void InitInterfaceToComponentMapping()
+        internal static async void Initialization()
         {
             Debug.Log("Interface Mapping Initializing ...");
             if (Settings.AcceptedNamespaceCount > 0)
@@ -66,7 +66,7 @@ namespace AceLand.EventDriven.EventInterface
         {
             foreach (var acceptedName in Settings.AcceptedNamespaces)
             {
-                if (!typeName.Contains(acceptedName.ToLower())) continue;
+                if (!typeName.StartsWith(acceptedName.ToLower())) continue;
                 return true;
             }
             return false;
@@ -112,9 +112,8 @@ namespace AceLand.EventDriven.EventInterface
                 foreach (var curObj in objects)
                 {
                     if (curObj is not T curObjAsT)
-                    {
                         throw new Exception($"Unable to cast '{curObj.GetType()}' to '{t}'");
-                    }
+                    
                     yield return curObjAsT;
                 }
             }

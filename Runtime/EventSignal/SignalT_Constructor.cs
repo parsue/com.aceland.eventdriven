@@ -5,12 +5,12 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal<T> : DisposableObject
     {
-        private Signal(string id, Observers<T> observers, T value, bool readonlyToObserver)
+        private Signal(string id, Observers<T> observers, T value, bool forceReadonly)
         {
             Id = id;
             _observers = observers;
             _value = value;
-            _readonlyToObserver = readonlyToObserver;
+            _forceReadonly = forceReadonly;
         }
 
         ~Signal() => Dispose(false);

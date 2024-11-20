@@ -9,7 +9,7 @@ namespace AceLand.EventDriven.EventSignal
         public string Id { get; }
         private readonly Observers<T> _observers;
         private T _value;
-        private readonly bool _readonlyToObserver;
+        private readonly bool _forceReadonly;
         
         public T Value
         {
