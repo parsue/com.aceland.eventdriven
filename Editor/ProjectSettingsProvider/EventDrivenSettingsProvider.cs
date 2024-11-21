@@ -1,14 +1,13 @@
-using AceLand.Library.Editor;
 using AceLand.EventDriven.ProjectSetting;
+using AceLand.Library.Editor.Providers;
 using UnityEditor;
 using UnityEngine.UIElements;
 
 namespace AceLand.EventDriven.Editor.ProjectSettingsProvider
 {
-    public class EventDrivenSettingsProvider : SettingsProvider
+    public class EventDrivenSettingsProvider : AceLandSettingsProvider
     {
         public const string SETTINGS_NAME = "Project/AceLand Event Driven";
-        private SerializedObject _settings;
         
         private EventDrivenSettingsProvider(string path, SettingsScope scope = SettingsScope.User) 
             : base(path, scope) { }
@@ -18,7 +17,7 @@ namespace AceLand.EventDriven.Editor.ProjectSettingsProvider
         
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
-            _settings = EventDrivenSettings.GetSerializedSettings();
+            Settings = EventDrivenSettings.GetSerializedSettings();
         }
 
         [SettingsProvider]
@@ -26,11 +25,6 @@ namespace AceLand.EventDriven.Editor.ProjectSettingsProvider
         {
             var provider = new EventDrivenSettingsProvider(SETTINGS_NAME, SettingsScope.Project);
             return provider;
-        }
-
-        public override void OnGUI(string searchContext)
-        {
-            EditorHelper.DrawAllProperties(_settings);
         }
     }
 }
