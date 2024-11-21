@@ -32,6 +32,11 @@ namespace AceLand.EventDriven.EventSignal
             _observers.RemoveListener(listener);
         }
 
+        public void RemoveAllListeners()
+        {
+            _observers.Clear();
+        }
+
         public void Trigger() => 
             _observers.Trigger(Value);
 
