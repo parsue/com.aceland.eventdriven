@@ -17,6 +17,7 @@ namespace AceLand.EventDriven.Editor.ProjectSettingsProvider
         
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
+            base.OnActivate(searchContext, rootElement);
             Settings = EventDrivenSettings.GetSerializedSettings();
         }
 
