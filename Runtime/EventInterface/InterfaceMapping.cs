@@ -91,7 +91,8 @@ namespace AceLand.EventDriven.EventInterface
             return allTypesSpan;
         }
         
-        public static IEnumerable<T> FindObjects<T>() where T : class
+        public static IEnumerable<T> FindObjects<T>(FindObjectsInactive findObjectsInactive = FindObjectsInactive.Exclude)
+            where T : class
         {
             if (!Initialized) yield break;
             
@@ -106,7 +107,7 @@ namespace AceLand.EventDriven.EventInterface
 
             foreach (var curType in types)
             {
-                var objects = Object.FindObjectsByType(curType, FindObjectsSortMode.None);
+                var objects = Object.FindObjectsByType(curType, findObjectsInactive, FindObjectsSortMode.None);
                 if (objects.Length == 0) continue;
 
                 foreach (var curObj in objects)
@@ -119,7 +120,8 @@ namespace AceLand.EventDriven.EventInterface
             }
         }
 
-        public static T FindObject<T>() where T : class
+        public static T FindObject<T>(FindObjectsInactive findObjectsInactive = FindObjectsInactive.Exclude)
+            where T : class
         {
             if (!Initialized) return null;
             
@@ -129,7 +131,7 @@ namespace AceLand.EventDriven.EventInterface
 
             ReadOnlySpan<Type> types = types1;
             if (types.IsEmpty) return null;
-            return Object.FindFirstObjectByType(types[0]) as T;
+            return Object.FindFirstObjectByType(types[0], findObjectsInactive) as T;
         }
 
         public static IEnumerable<T> GetInterfaceComponents<T>(this Component component) where T : class
