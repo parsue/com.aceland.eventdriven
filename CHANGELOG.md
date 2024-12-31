@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.7] - 2024-12-31
+
+### Modify
+- Handling FindObjectsInactive on FindObjects in InterfaceMappings
+
 ## [1.0.6] - 2024-11-26
 
 ### Modify
