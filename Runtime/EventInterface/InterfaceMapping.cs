@@ -112,6 +112,8 @@ namespace AceLand.EventDriven.EventInterface
 
                 foreach (var curObj in objects)
                 {
+                    if (findObjectsInactive is FindObjectsInactive.Exclude && curObj is MonoBehaviour { enabled: false })
+                        continue;
                     if (curObj is not T curObjAsT)
                         throw new Exception($"Unable to cast '{curObj.GetType()}' to '{t}'");
                     
@@ -131,7 +133,11 @@ namespace AceLand.EventDriven.EventInterface
 
             ReadOnlySpan<Type> types = types1;
             if (types.IsEmpty) return null;
-            return Object.FindFirstObjectByType(types[0], findObjectsInactive) as T;
+            var curObjAsT = Object.FindFirstObjectByType(types[0], findObjectsInactive) as T;
+
+            return findObjectsInactive is FindObjectsInactive.Exclude && curObjAsT is MonoBehaviour { enabled: false }
+                ? null
+                : curObjAsT;
         }
 
         public static IEnumerable<T> GetInterfaceComponents<T>(this Component component) where T : class
