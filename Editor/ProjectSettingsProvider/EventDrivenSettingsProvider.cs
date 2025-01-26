@@ -7,7 +7,7 @@ namespace AceLand.EventDriven.Editor.ProjectSettingsProvider
 {
     public class EventDrivenSettingsProvider : AceLandSettingsProvider
     {
-        public const string SETTINGS_NAME = "Project/AceLand Event Driven";
+        public const string SETTINGS_NAME = "Project/AceLand Packages/Event Driven";
         
         private EventDrivenSettingsProvider(string path, SettingsScope scope = SettingsScope.User) 
             : base(path, scope) { }

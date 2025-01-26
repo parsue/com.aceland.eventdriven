@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.8] - 2025-1-25
+
+### Modify
+- [Editor] AceLand Project Setting as Tree structure
+
 ## [1.0.7] - 2024-12-31
 
 ### Modify
