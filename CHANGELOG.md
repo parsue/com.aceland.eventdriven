@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.9] - 2025-02-05
+
+### Fixed
+- [Interface Mapping] ignore abstract class
+
 ## [1.0.8] - 2025-1-25
 
 ### Modify
