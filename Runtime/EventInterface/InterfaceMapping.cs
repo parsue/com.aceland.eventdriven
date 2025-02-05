@@ -49,7 +49,7 @@ namespace AceLand.EventDriven.EventInterface
                     foreach (var curType in typesSpan)
                     {
                         var t = typeof(Component);
-                        if (curType.IsInterface) continue;
+                        if (curType.IsInterface || curType.IsAbstract) continue;
                         if (!type.IsAssignableFrom(curType) || !curType.IsSubclassOf(t)) continue;
                         if (t != curType && !curType.IsSubclassOf(t)) continue;
 
