@@ -9,6 +9,7 @@ namespace AceLand.EventDriven
         private static void Initialization()
         {
             InterfaceMapping.Initialization();
+            InterfaceBinding.Initialization();
         }
     }
 }
