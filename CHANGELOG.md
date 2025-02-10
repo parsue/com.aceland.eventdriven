@@ -6,9 +6,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.11] - 2025-02-10
+
+### Added
+- [Interface Binding] Unbind<>() for remove binding 
+### Fixed
+- [Interface Binding] error on empty ListBindings
+### Modified
+- [Interface Binding] publish version
+- [Interface Binding] output type of ListBindings to ReadOnlySpan<>
+
 ## [1.0.10] - 2025-02-10
 
-### added
+### Added
 - [Interface Binding] experimental level is released.
 
 ## [1.0.9] - 2025-02-05
@@ -18,17 +28,17 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.8] - 2025-1-25
 
-### Modify
+### Modified
 - [Editor] AceLand Project Setting as Tree structure
 
 ## [1.0.7] - 2024-12-31
 
-### Modify
+### Modified
 - Handling FindObjectsInactive on FindObjects in InterfaceMappings
 
 ## [1.0.6] - 2024-11-26
 
-### Modify
+### Modified
 - [Editor] Undo functional for Project Settings
 
 ## [1.0.4] - 2024-11-24

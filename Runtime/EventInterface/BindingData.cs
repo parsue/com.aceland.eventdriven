@@ -25,28 +25,44 @@ namespace AceLand.EventDriven.EventInterface
             if (!_bindings[interfaceType].Contains(target))
                 _bindings[interfaceType].Add(target);
         }
+
+        public void Unbind<TInterface>(object target)
+        {
+            var interfaceType = typeof(TInterface);
+            if (!Validate(interfaceType, target)) return;
+            if (!_bindings.TryGetValue(interfaceType, out var list)) return;
+            if (!list.Contains(target)) return;
+            list.Remove(target);
+            if (list.Count == 0) _bindings.Remove(interfaceType);
+        }
         
         public bool Implements<TInterface>(object target)
         {
             var interfaceType = typeof(TInterface);
-            if (!Validate(interfaceType, target)) return false;
+            if (!Validate(interfaceType, target) || !_bindings.TryGetValue(interfaceType, out var list))
+                return false;
             
-            return _bindings.ContainsKey(interfaceType) && _bindings[interfaceType].Contains(target);
+            return list.Contains(target);
         }
         
-        public IEnumerable<TInterface> ListBindings<TInterface>()
+        public ReadOnlySpan<TInterface> ListBindings<TInterface>()
         {
             var interfaceType = typeof(TInterface);
-            if (!Validate(interfaceType)) return Array.Empty<TInterface>();
+            if (!Validate(interfaceType))
+                return Array.Empty<TInterface>();
+
+            if (_bindings.TryGetValue(interfaceType, out var list))
+                return list.Cast<TInterface>().ToArray();
             
-            return _bindings[interfaceType].Cast<TInterface>();
+            Debug.LogWarning($"Namespace '{interfaceType.FullName}' has not been binding.");
+            return Array.Empty<TInterface>();
         }
 
         public Task<IEnumerable<TInterface>> ListBindingsAsync<TInterface>()
         {
             var token = Promise.ApplicationAliveToken;
             var interfaceType = typeof(TInterface);
-            
+
             return Task.Run(async () =>
                 {
                     if (!Validate(interfaceType)) return Enumerable.Empty<TInterface>();
@@ -55,7 +71,11 @@ namespace AceLand.EventDriven.EventInterface
                     while (!_bindings.ContainsKey(interfaceType) && DateTime.Now < targetTime &&
                            !token.IsCancellationRequested)
                         await Task.Delay(150, token);
-                    return _bindings[interfaceType].Cast<TInterface>();
+                    
+                    if (_bindings.TryGetValue(interfaceType, out var list))
+                        return list.Cast<TInterface>();
+
+                    throw new Exception($"Namespace '{interfaceType.FullName}' has not been binding.");
                 },
                 token
             );

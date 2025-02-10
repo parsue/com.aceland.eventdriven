@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AceLand.EventDriven.EventInterface
@@ -15,10 +16,13 @@ namespace AceLand.EventDriven.EventInterface
         public static void Bind<TInterface>(object target) =>
             _bindingData.Bind<TInterface>(target);
         
+        public static void Unbind<TInterface>(object target) =>
+            _bindingData.Unbind<TInterface>(target);
+        
         public static bool Implements<TInterface>(object target) =>
             _bindingData.Implements<TInterface>(target);
         
-        public static IEnumerable<TInterface> ListBindings<TInterface>() =>
+        public static ReadOnlySpan<TInterface> ListBindings<TInterface>() =>
             _bindingData.ListBindings<TInterface>();
         
         public static Task<IEnumerable<TInterface>> ListBindingsAsync<TInterface>() =>

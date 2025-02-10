@@ -9,6 +9,8 @@ using Object = UnityEngine.Object;
 
 namespace AceLand.EventDriven.EventInterface
 {
+    [Obsolete("Please use Interface Binding. Please refer to the documentation: " +
+              "https://docs.parsue.io/aceland-unity-packages/packages/event-driven/interface-binding-exp")]
     public static class InterfaceMapping
     {
         private static EventDrivenSettings Settings => EventDrivenUtils.Settings;
