@@ -46,7 +46,7 @@ namespace AceLand.EventDriven.EventInterface
         public static bool Implements<TInterface>(object target) =>
             _bindingData.Implements<TInterface>(target);
         
-        public static ReadOnlySpan<TInterface> ListBindings<TInterface>() =>
+        public static IEnumerable<TInterface> ListBindings<TInterface>() =>
             _bindingData.ListBindings<TInterface>();
         
         public static Task<IEnumerable<TInterface>> ListBindingsAsync<TInterface>() =>

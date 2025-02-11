@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.13] - 2025-02-11
+
+### Modified
+- [Interface Binding] IEnumerable<TInterface> will be returned by ListBindings() for Unity
+- [Interface Binding] removed log and error throw when no binding of interface when calling ListBindings or ListBindingsAsync
+
 ## [1.0.12] - 2025-02-11
 
 ### Added
@@ -24,7 +30,7 @@ All notable changes to this project will be documented in this file.
 ## [1.0.10] - 2025-02-10
 
 ### Added
-- [Interface Binding] experimental level is released.
+- [Interface Binding] experimental level is released
 
 ## [1.0.9] - 2025-02-05
 

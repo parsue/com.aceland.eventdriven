@@ -110,17 +110,16 @@ namespace AceLand.EventDriven.EventInterface
             return list.Contains(target);
         }
         
-        public ReadOnlySpan<TInterface> ListBindings<TInterface>()
+        public IEnumerable<TInterface> ListBindings<TInterface>()
         {
             var interfaceType = typeof(TInterface);
             if (!Validate(interfaceType))
-                return Array.Empty<TInterface>();
+                return Enumerable.Empty<TInterface>();
 
             if (_bindings.TryGetValue(interfaceType, out var list))
-                return list.Cast<TInterface>().ToArray();
+                return list.Cast<TInterface>();
             
-            Debug.LogWarning($"Namespace '{interfaceType.FullName}' has not been binding.");
-            return Array.Empty<TInterface>();
+            return Enumerable.Empty<TInterface>();
         }
 
         public Task<IEnumerable<TInterface>> ListBindingsAsync<TInterface>()
@@ -140,7 +139,7 @@ namespace AceLand.EventDriven.EventInterface
                     if (_bindings.TryGetValue(interfaceType, out var list))
                         return list.Cast<TInterface>();
 
-                    throw new Exception($"Namespace '{interfaceType.FullName}' has not been binding.");
+                    return Enumerable.Empty<TInterface>();
                 },
                 token
             );
