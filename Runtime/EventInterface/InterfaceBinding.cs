@@ -16,8 +16,32 @@ namespace AceLand.EventDriven.EventInterface
         public static void Bind<TInterface>(object target) =>
             _bindingData.Bind<TInterface>(target);
         
+        public static void Bind<T0, T1>(object target) =>
+            _bindingData.Bind<T0, T1>(target);
+        
+        public static void Bind<T0, T1, T2>(object target) =>
+            _bindingData.Bind<T0, T1, T2>(target);
+        
+        public static void Bind<T0, T1, T2, T3>(object target) =>
+            _bindingData.Bind<T0, T1, T2, T3>(target);
+        
+        public static void Bind<T0, T1, T2, T3, T4>(object target) =>
+            _bindingData.Bind<T0, T1, T2, T3, T4>(target);
+        
         public static void Unbind<TInterface>(object target) =>
             _bindingData.Unbind<TInterface>(target);
+        
+        public static void Unbind<T0, T1>(object target) =>
+            _bindingData.Unbind<T0, T1>(target);
+        
+        public static void Unbind<T0, T1, T2>(object target) =>
+            _bindingData.Unbind<T0, T1, T2>(target);
+        
+        public static void Unbind<T0, T1, T2, T3>(object target) =>
+            _bindingData.Unbind<T0, T1, T2, T3>(target);
+        
+        public static void Unbind<T0, T1, T2, T3, T4>(object target) =>
+            _bindingData.Unbind<T0, T1, T2, T3, T4>(target);
         
         public static bool Implements<TInterface>(object target) =>
             _bindingData.Implements<TInterface>(target);

@@ -26,6 +26,38 @@ namespace AceLand.EventDriven.EventInterface
                 _bindings[interfaceType].Add(target);
         }
 
+        public void Bind<T0, T1>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1) };
+            
+            BindMultiTargets(target, interfaceTypes);
+        }
+
+        public void Bind<T0, T1, T2>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1), typeof(T2) };
+
+            BindMultiTargets(target, interfaceTypes);
+        }
+
+        public void Bind<T0, T1, T2, T3>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1), typeof(T2), typeof(T3) };
+
+            BindMultiTargets(target, interfaceTypes);
+        }
+
+        public void Bind<T0, T1, T2, T3, T4>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1), typeof(T2), typeof(T3), typeof(T4) };
+
+            BindMultiTargets(target, interfaceTypes);
+        }
+
         public void Unbind<TInterface>(object target)
         {
             var interfaceType = typeof(TInterface);
@@ -33,7 +65,40 @@ namespace AceLand.EventDriven.EventInterface
             if (!_bindings.TryGetValue(interfaceType, out var list)) return;
             if (!list.Contains(target)) return;
             list.Remove(target);
-            if (list.Count == 0) _bindings.Remove(interfaceType);
+            if (list.Count > 0) return;
+            _bindings.Remove(interfaceType);
+        }
+
+        public void Unbind<T0, T1>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1) };
+            
+            UnbindMultiTargets(target, interfaceTypes);
+        }
+
+        public void Unbind<T0, T1, T2>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1), typeof(T2) };
+
+            UnbindMultiTargets(target, interfaceTypes);
+        }
+
+        public void Unbind<T0, T1, T2, T3>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1), typeof(T2), typeof(T3) };
+
+            UnbindMultiTargets(target, interfaceTypes);
+        }
+
+        public void Unbind<T0, T1, T2, T3, T4>(object target)
+        {
+            var interfaceTypes = new[] 
+                { typeof(T0), typeof(T1), typeof(T2), typeof(T3), typeof(T4) };
+
+            UnbindMultiTargets(target, interfaceTypes);
         }
         
         public bool Implements<TInterface>(object target)
@@ -79,6 +144,36 @@ namespace AceLand.EventDriven.EventInterface
                 },
                 token
             );
+        }
+
+        private void BindMultiTargets(object target, Type[] interfaceTypes)
+        {
+            foreach (var interfaceType in interfaceTypes)
+                if (!Validate(interfaceType, target)) return;
+
+            foreach (var interfaceType in interfaceTypes)
+            {
+                if (!_bindings.ContainsKey(interfaceType))
+                    _bindings[interfaceType] = new List<object>();
+                
+                if (!_bindings[interfaceType].Contains(target))
+                    _bindings[interfaceType].Add(target);
+            }
+        }
+
+        private void UnbindMultiTargets(object target, Type[] interfaceTypes)
+        {
+            foreach (var interfaceType in interfaceTypes)
+                if (!Validate(interfaceType, target)) return;
+
+            foreach (var interfaceType in interfaceTypes)
+            {
+                if (!_bindings.TryGetValue(interfaceType, out var list)) continue;
+                if (!list.Contains(target)) continue;
+                list.Remove(target);
+                if (list.Count > 0) continue;
+                _bindings.Remove(interfaceType);
+            }
         }
 
         private static bool Validate(Type interfaceType)

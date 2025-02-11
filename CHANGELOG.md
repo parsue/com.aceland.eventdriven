@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.12] - 2025-02-11
+
+### Added
+- [Interface Binding] multi interface binding and unbinding
+
 ## [1.0.11] - 2025-02-10
 
 ### Added
