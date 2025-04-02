@@ -9,6 +9,8 @@ using UnityEngine;
 
 namespace AceLand.EventDriven.EventInterface
 {
+    [Obsolete("Please use EventBus instead. Please refer to the documentation: " +
+              "https://docs.parsue.io/aceland-unity-packages/packages/event-driven/eventbus")]
     internal class BindingData
     {
         private static EventDrivenSettings Settings => EventDrivenUtils.Settings;
