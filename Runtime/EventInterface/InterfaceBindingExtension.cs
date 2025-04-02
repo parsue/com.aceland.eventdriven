@@ -1,5 +1,9 @@
-﻿namespace AceLand.EventDriven.EventInterface
+﻿using System;
+
+namespace AceLand.EventDriven.EventInterface
 {
+    [Obsolete("Please use EventBus instead. Please refer to the documentation: " +
+              "https://docs.parsue.io/aceland-unity-packages/packages/event-driven/eventbus")]
     public static class InterfaceBindingExtension
     {
         public static void Bind<TInterface>(this object target) =>

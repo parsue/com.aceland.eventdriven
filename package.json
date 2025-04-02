@@ -1,6 +1,6 @@
 {
   "name": "com.aceland.eventdriven",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "displayName": "AceLand Event Driven",
   "description": "AceLand Event Driven is a framework designed for Unity.\n\nPlease visit our [Git Book](https://aceland-workshop.gitbook.io/aceland-unity-packages).",
   "unity": "2022.3",
@@ -18,15 +18,18 @@
     "eventdriven",
     "event",
     "driven",
-    "signal"
+    "signal",
+    "interface",
+    "eventbus",
+    "bus"
   ],
   "dependencies": {
-    "com.aceland.library": "1.0.11",
+    "com.aceland.library": "1.0.20",
     "com.aceland.taskutils": "1.0.6"
   },
   "publishConfig": {
     "registry": "https://package.openupm.com"
   },
-  "documentationUrl": "https://aceland-workshop.gitbook.io/aceland-unity-packages",
+  "documentationUrl": "https://docs.parsue.io/aceland-unity-packages/packages/event-driven",
   "type": "framework"
 }
