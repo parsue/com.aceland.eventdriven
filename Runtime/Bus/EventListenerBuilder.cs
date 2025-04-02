@@ -1,0 +1,90 @@
+﻿using System;
+
+namespace AceLand.EventDriven.Bus
+{
+    // Builder for subscribe an listener
+    public static class EventListenerBuilder
+    {
+        public interface IEventListenerReceiverBuilder
+        {
+            IEventKickStartBuilder WithListener(Action<object> listener);
+            IEventKickStartBuilder WithListener<TPayload>(Action<object, TPayload> listener) where TPayload : IEventData;
+            
+            void Unlisten(Action<object> listener);
+            void Unlisten<TPayload>(Action<object, TPayload> listener) where TPayload : IEventData;
+        }
+        
+        public interface IEventKickStartBuilder : IEventSubscribeBuilder
+        {
+            IEventSubscribeBuilder WithKickStart();
+        }
+        
+        public interface IEventSubscribeBuilder
+        {
+            void Listen();
+        }
+
+        internal class EventListenerReceiverBuilder<T> : IEventListenerReceiverBuilder
+            where T : class
+        {
+            internal EventListenerReceiverBuilder()
+            {
+                if (!typeof(T).IsInterface)
+                    throw new ArgumentException($"Event type {typeof(T).Name} must be an interface.");
+            }
+
+            public IEventKickStartBuilder WithListener(Action<object> listener) =>
+                new EventListenerSubscriptionBuilder<T>(listener);
+
+            public IEventKickStartBuilder WithListener<TPayload>(Action<object, TPayload> listener)
+                where TPayload : IEventData =>
+                new EventListenerSubscriptionBuilder<T,TPayload>(listener);
+
+            public void Unlisten(Action<object> listener) =>
+                EventBus.Unsubscribe<T>(listener);
+
+            public void Unlisten<TPayload>(Action<object, TPayload> listener)
+                where TPayload : IEventData =>
+                EventBus.Unsubscribe<T, TPayload>(listener);
+        }
+
+        internal class EventListenerSubscriptionBuilder<T> : IEventKickStartBuilder
+            where T : class
+        {
+            private readonly Action<object> _listener;
+            private bool _kickStart;
+            
+            internal EventListenerSubscriptionBuilder(Action<object> listener) =>
+                _listener = listener;
+            
+            public IEventSubscribeBuilder WithKickStart()
+            {
+                EventBus.SendEventCache<T>(_listener);
+                return this;
+            }
+            
+            public void Listen() =>
+                EventBus.Subscribe<T>(_listener);
+        }
+
+        internal class EventListenerSubscriptionBuilder<T, TPayload> : IEventKickStartBuilder
+            where T : class
+            where TPayload : IEventData
+        {
+            private readonly Action<object, TPayload> _listener;
+            private bool _kickStart;
+            
+            internal EventListenerSubscriptionBuilder(Action<object, TPayload> listener) =>
+                _listener = listener;
+
+            public IEventSubscribeBuilder WithKickStart()
+            {
+                EventBus.SendEventCache<T, TPayload>(_listener);
+                return this;
+            }
+
+            public void Listen() =>
+                EventBus.Subscribe<T, TPayload>(_listener);
+        }
+    }
+}
