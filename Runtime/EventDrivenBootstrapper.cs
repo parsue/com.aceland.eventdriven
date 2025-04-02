@@ -8,7 +8,6 @@ namespace AceLand.EventDriven
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void Initialization()
         {
-            InterfaceMapping.Initialization();
             InterfaceBinding.Initialization();
         }
     }
