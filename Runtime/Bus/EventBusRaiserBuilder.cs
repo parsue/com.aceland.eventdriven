@@ -7,7 +7,7 @@ namespace AceLand.EventDriven.Bus
     {
         public interface IEventRaiserDataBuilder : IEventRaiserRaiseBuilder
         {
-            IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data) where TPayload : IEventData;
+            IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data);
         }
 
         public interface IEventRaiserRaiseBuilder
@@ -28,7 +28,7 @@ namespace AceLand.EventDriven.Bus
                 _sender = sender;
             }
 
-            public IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data) where TPayload : IEventData =>
+            public IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data) =>
                 new EventRaiserBuilder<T, TPayload>(_sender, data);
 
             public void Raise()
@@ -37,9 +37,8 @@ namespace AceLand.EventDriven.Bus
             }
         }
 
-        internal class EventRaiserBuilder<T, TPayload> : IEventRaiserRaiseBuilder
+        private class EventRaiserBuilder<T, TPayload> : IEventRaiserRaiseBuilder
             where T : class
-            where TPayload : IEventData
         {
             private readonly object _sender;
             private readonly TPayload _data;

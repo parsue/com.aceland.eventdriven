@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.15] - 2015-04-03
+### Modified
+- [EventBus] IEventData is not required for Event<TPayload>
+
 ## [1.0.14] - 2025-04-03
 ### Added
 - [EventBus] created, replacement of Interface Binding
