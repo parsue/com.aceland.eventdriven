@@ -10,8 +10,8 @@ namespace AceLand.EventDriven.Bus
             IEventKickStartBuilder WithListener(Action<object> listener);
             IEventKickStartBuilder WithListener<TPayload>(Action<object, TPayload> listener);
             
-            void Unlisten(Action<object> listener);
-            void Unlisten<TPayload>(Action<object, TPayload> listener);
+            void Unsubscribe(Action<object> listener);
+            void Unsubscribe<TPayload>(Action<object, TPayload> listener);
         }
         
         public interface IEventKickStartBuilder : IEventSubscribeBuilder
@@ -21,7 +21,7 @@ namespace AceLand.EventDriven.Bus
         
         public interface IEventSubscribeBuilder
         {
-            void Listen();
+            void Subscribe();
         }
 
         internal class EventListenerReceiverBuilder<T> : IEventListenerReceiverBuilder
@@ -39,10 +39,10 @@ namespace AceLand.EventDriven.Bus
             public IEventKickStartBuilder WithListener<TPayload>(Action<object, TPayload> listener) =>
                 new EventListenerSubscriptionBuilder<T,TPayload>(listener);
 
-            public void Unlisten(Action<object> listener) =>
+            public void Unsubscribe(Action<object> listener) =>
                 EventBus.Unsubscribe<T>(listener);
 
-            public void Unlisten<TPayload>(Action<object, TPayload> listener) =>
+            public void Unsubscribe<TPayload>(Action<object, TPayload> listener) =>
                 EventBus.Unsubscribe<T, TPayload>(listener);
         }
 
@@ -61,7 +61,7 @@ namespace AceLand.EventDriven.Bus
                 return this;
             }
             
-            public void Listen() =>
+            public void Subscribe() =>
                 EventBus.Subscribe<T>(_listener);
         }
 
@@ -80,7 +80,7 @@ namespace AceLand.EventDriven.Bus
                 return this;
             }
 
-            public void Listen() =>
+            public void Subscribe() =>
                 EventBus.Subscribe<T, TPayload>(_listener);
         }
     }

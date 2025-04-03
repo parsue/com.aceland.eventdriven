@@ -5,7 +5,7 @@ namespace AceLand.EventDriven.Bus
     // IEventListener can subscribe listener from this extension 
     public static class EventListenerExtensions
     {
-        public static EventListenerBuilder.IEventListenerReceiverBuilder Event<T>(this IEventListener listener)
+        public static EventListenerBuilder.IEventListenerReceiverBuilder Listen<T>(this IEventListener listener)
             where T : class
         {
             if (!typeof(T).IsInterface)
