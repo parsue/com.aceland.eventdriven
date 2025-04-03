@@ -2,27 +2,29 @@
 {
     public static class EventRaiserBuilders
     {
-        public interface IEventBusRaiserBuilder : IEventRaiserRaiseBuilder
+        public interface IEventRaiserPayloadBuilder : IEventRaiserRaiseBuilder
         {
             IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data);
         }
-
+        
         public interface IEventRaiserRaiseBuilder
         {
             void Raise();
         }
 
-        internal class EventBusEventRaiserBuilder<T> : IEventBusRaiserBuilder
+        internal class EventBusRaiserBuilder<T> : IEventRaiserPayloadBuilder
             where T : class
         {
             private readonly object _sender;
             
-            internal EventBusEventRaiserBuilder(object sender) =>
+            public EventBusRaiserBuilder(object sender)
+            {
                 _sender = sender;
+            }
 
             public IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data) =>
                 new EventBusRaiserBuilder<T, TPayload>(_sender, data);
-
+            
             public void Raise() =>
                 EventBus.RaiseEvent<T>(_sender);
         }

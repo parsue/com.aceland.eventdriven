@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.18] - 2015-04-03
+### Modified
+- [EventBus] centralize methods chain in builders
+
 ## [1.0.17] - 2015-04-03
 ### Modified
 - [EventBus] IEventListener and IEventRaiser is not required for user

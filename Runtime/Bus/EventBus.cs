@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace AceLand.EventDriven.Bus
 {
-    // No access on this class.
-    // Users should use Extensions of IEventRaiser and IEventListener
     public static class EventBus
     {
         // event without payload <IEvent, Listener<sender>>
@@ -14,22 +12,14 @@ namespace AceLand.EventDriven.Bus
         // latest IEventData <IEvent, EventCache>
         private static readonly Dictionary<Type, EventCache> eventCache = new();
         
-        public static EventRaiserBuilders.IEventBusRaiserBuilder Event<T>(object sender)
+        // user entrance to raise event or subscribe listener
+        public static EventBusBuilders.IEventBusBuilder Event<T>()
             where T : class
         {
             if (!typeof(T).IsInterface)
                 throw new ArgumentException($"Event type {typeof(T).Name} must be an interface.");
 
-            return new EventRaiserBuilders.EventBusEventRaiserBuilder<T>(sender);
-        }
-        
-        public static EventListenerBuilders.IEventBusListenerBuilder Event<T>()
-            where T : class
-        {
-            if (!typeof(T).IsInterface)
-                throw new ArgumentException($"Event type {typeof(T).Name} must be an interface.");
-
-            return new EventListenerBuilders.EventBusEventListenerBuilder<T>();
+            return new EventBusBuilders.EventBusBuilder<T>();
         }
 
         // Subscribe a new Listener without payload for listener
