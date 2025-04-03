@@ -5,7 +5,7 @@ namespace AceLand.EventDriven.Bus
 {
     // No access on this class.
     // Users should use Extensions of IEventRaiser and IEventListener
-    internal static class EventBus
+    public static class EventBus
     {
         // event without payload <IEvent, Listener<sender>>
         private static readonly Dictionary<Type, Action<object>> events = new();
@@ -13,6 +13,24 @@ namespace AceLand.EventDriven.Bus
         private static readonly Dictionary<Type, Delegate> eventsWithPayload = new();
         // latest IEventData <IEvent, EventCache>
         private static readonly Dictionary<Type, EventCache> eventCache = new();
+        
+        public static EventRaiserBuilders.IEventBusRaiserBuilder Event<T>(object sender)
+            where T : class
+        {
+            if (!typeof(T).IsInterface)
+                throw new ArgumentException($"Event type {typeof(T).Name} must be an interface.");
+
+            return new EventRaiserBuilders.EventBusEventRaiserBuilder<T>(sender);
+        }
+        
+        public static EventListenerBuilders.IEventBusListenerBuilder Event<T>()
+            where T : class
+        {
+            if (!typeof(T).IsInterface)
+                throw new ArgumentException($"Event type {typeof(T).Name} must be an interface.");
+
+            return new EventListenerBuilders.EventBusEventListenerBuilder<T>();
+        }
 
         // Subscribe a new Listener without payload for listener
         internal static void Subscribe<T>(Action<object> listener)

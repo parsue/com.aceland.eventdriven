@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.17] - 2015-04-03
+### Modified
+- [EventBus] IEventListener and IEventRaiser is not required for user
+- [EventBus] remove extension
+- [EventBus] simplify methods chain, start with EventBus.Event<T>()
+
 ## [1.0.16] - 2015-04-03
 ### Modified
 - [EventBus] Rename extension methods for object being both IEventListener and IEventRaiser 
