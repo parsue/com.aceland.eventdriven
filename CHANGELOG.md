@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.19] - 2015-04-08
+### Removed
+- [Interface Binding] obsoleted, replaced by EventBus
+
 ## [1.0.18] - 2015-04-03
 ### Modified
 - [EventBus] centralize methods chain in builders
