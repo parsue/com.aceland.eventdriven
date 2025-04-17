@@ -13,7 +13,7 @@
         }
 
         internal class EventBusRaiserBuilder<T> : IEventRaiserPayloadBuilder
-            where T : class
+            where T : IEvent
         {
             private readonly object _sender;
             
@@ -30,7 +30,7 @@
         }
 
         private class EventBusRaiserBuilder<T, TPayload> : IEventRaiserRaiseBuilder
-            where T : class
+            where T : IEvent
         {
             private readonly object _sender;
             private readonly TPayload _payload;

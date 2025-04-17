@@ -14,7 +14,7 @@ namespace AceLand.EventDriven.Bus
         }
 
         internal class EventBusBuilder<T> : IEventBusBuilder
-            where T : class
+            where T : IEvent
         {
             public EventRaiserBuilders.IEventRaiserPayloadBuilder WithSender(object sender) =>
                 new EventRaiserBuilders.EventBusRaiserBuilder<T>(sender);

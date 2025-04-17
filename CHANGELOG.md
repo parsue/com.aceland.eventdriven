@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.20] - 2015-04-17
+### Added
+- [EventBus] add requirement on Event to be inherited by IEvent
+
 ## [1.0.19] - 2015-04-08
 ### Removed
 - [Interface Binding] obsoleted, replaced by EventBus

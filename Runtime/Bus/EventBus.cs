@@ -14,7 +14,7 @@ namespace AceLand.EventDriven.Bus
         
         // user entrance to raise event or subscribe listener
         public static EventBusBuilders.IEventBusBuilder Event<T>()
-            where T : class
+            where T : IEvent
         {
             if (!typeof(T).IsInterface)
                 throw new ArgumentException($"Event type {typeof(T).Name} must be an interface.");
@@ -24,7 +24,7 @@ namespace AceLand.EventDriven.Bus
 
         // Subscribe a new Listener without payload for listener
         internal static void Subscribe<T>(Action<object> listener)
-            where T : class
+            where T : IEvent
         {
             if (events.ContainsKey(typeof(T)))
                 events[typeof(T)] += listener;
@@ -34,7 +34,7 @@ namespace AceLand.EventDriven.Bus
         
         // Subscribe a new Listener with payload for listener
         internal static void Subscribe<T, TPayload>(Action<object, TPayload> listener)
-            where T : class
+            where T : IEvent
         {
             if (eventsWithPayload.ContainsKey(typeof(T)))
                 eventsWithPayload[typeof(T)] = Delegate.Combine(eventsWithPayload[typeof(T)], listener);
@@ -44,7 +44,7 @@ namespace AceLand.EventDriven.Bus
 
         // Unsubscribe a new Listener without payload
         internal static void Unsubscribe<T>(Action<object> listener)
-            where T : class
+            where T : IEvent
         {
             if (!events.ContainsKey(typeof(T))) return;
             events[typeof(T)] -= listener;
@@ -52,7 +52,7 @@ namespace AceLand.EventDriven.Bus
 
         // Unsubscribe a new Listener with payload
         internal static void Unsubscribe<T, TPayload>(Action<object, TPayload> listener)
-            where T : class
+            where T : IEvent
         {
             if (!eventsWithPayload.ContainsKey(typeof(T))) return;
             eventsWithPayload[typeof(T)] = Delegate.Remove(eventsWithPayload[typeof(T)], listener);
@@ -60,7 +60,7 @@ namespace AceLand.EventDriven.Bus
         
         // Send Event Cache without payload, StartKick will send after Subscribed
         internal static void SendEventCache<T>(Action<object> listener)
-            where T : class
+            where T : IEvent
         {
             if (!eventCache.ContainsKey(typeof(T))) return;
             var cache = eventCache[typeof(T)];
@@ -69,7 +69,7 @@ namespace AceLand.EventDriven.Bus
 
         // Send Event Cache with payload, StartKick will send after Subscribed
         internal static void SendEventCache<T, TPayload>(Action<object, TPayload> listener)
-            where T : class
+            where T : IEvent
         {
             if (!eventCache.ContainsKey(typeof(T))) return;
             var cache = eventCache[typeof(T)];
@@ -78,7 +78,7 @@ namespace AceLand.EventDriven.Bus
         
         // Raise an Event without payload to listeners
         internal static void RaiseEvent<T>(object sender)
-            where T : class
+            where T : IEvent
         {
             eventCache[typeof(T)] = new EventCache(sender, null);
             if (events.ContainsKey(typeof(T)))
@@ -87,7 +87,7 @@ namespace AceLand.EventDriven.Bus
         
         // Raise an Event with payload to listeners
         internal static void RaiseEvent<T, TPayload>(object sender, TPayload payload)
-            where T : class
+            where T : IEvent
         {
             if (!typeof(T).IsInterface)
                 throw new ArgumentException($"Event type {typeof(T).Name} must be an interface.");
