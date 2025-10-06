@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Optional;
 
@@ -11,49 +10,48 @@ namespace AceLand.EventDriven.EventSignal
         
         public interface ISignalBuilder
         {
-            Signal Build();
-            ISignalBuilder WithId(string id);
-            ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
-            ISignalBuilder WithListener(Action listener);
-            ISignalBuilder WithListeners(params Action[] listeners);
+            ISignalFinalBuilder WithId(string id);
+            ISignalFinalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
         }
 
-        private class SignalBuilder : ISignalBuilder
+        public interface ISignalValueBuilder
+        {
+            Signal<T>.ISignalFinalBuilder<T> WithValue<T>(T value);
+        }
+        
+        public interface ISignalFinalBuilder : ISignalValueBuilder
+        {
+            Signal Build();
+        }
+        
+        private class SignalBuilder : ISignalBuilder, ISignalFinalBuilder
         {
             private Option<string> _id = Option<string>.None();
-            private readonly List<Action> _listeners = new();
 
             public Signal Build()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
-                var observers = new Observers(_listeners.ToArray());
+                var observers = new Observers();
                 var signal = new Signal(id, observers);
                 Signals.RegistrySignal(signal);
                 return signal;
             }
 
-            public ISignalBuilder WithId(string id)
+            ISignalFinalBuilder ISignalBuilder.WithId(string id)
             {
                 _id = id.ToOption();
                 return this;
             }
 
-            public ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum
+            ISignalFinalBuilder ISignalBuilder.WithId<TEnum>(TEnum id)
             {
                 _id = id.ToString().ToOption();
                 return this;
             }
 
-            public ISignalBuilder WithListener(Action listener)
+            public Signal<T>.ISignalFinalBuilder<T> WithValue<T>(T value)
             {
-                _listeners.Add(listener);
-                return this;
-            }
-
-            public ISignalBuilder WithListeners(params Action[] listeners)
-            {
-                _listeners.AddRange(listeners);
-                return this;
+                return new Signal<T>.SignalBuilder<T>(_id, value);
             }
         }
     }

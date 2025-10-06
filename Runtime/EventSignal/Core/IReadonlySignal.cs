@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AceLand.EventDriven.EventSignal.Core
+﻿namespace AceLand.EventDriven.EventSignal.Core
 {
     public interface IReadonlySignal<out T>
     {

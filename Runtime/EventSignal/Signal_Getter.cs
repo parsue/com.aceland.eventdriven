@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
+using AceLand.EventDriven.Exceptions;
 using AceLand.TaskUtils;
 using UnityEngine;
 
@@ -9,10 +10,10 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal
     {
-        public static Task<Signal> GetAsync(string id) => 
-            GetSignal(id); 
-        public static Task<Signal> GetAsync<TEnum>(TEnum id) where TEnum: Enum =>
-            GetSignal(id.ToString());
+        public static Promise<Signal> GetAsync(string id) => 
+            GetSignalAsync(id); 
+        public static Promise<Signal> GetAsync<TEnum>(TEnum id) where TEnum: Enum =>
+            GetSignalAsync(id.ToString());
 
         public static Signal Get(string id) =>
             Signals.TryGetSignal(id, out Signal signal) == 0 ? signal : null;
@@ -20,7 +21,7 @@ namespace AceLand.EventDriven.EventSignal
         public static Signal Get<TEnum>(TEnum id) where TEnum: Enum =>
             Get(id.ToString());
 
-        private static async Task<Signal> GetSignal(string id)
+        private static async Task<Signal> GetSignalAsync(string id)
         {
             var aliveToken = Promise.ApplicationAliveToken;
             var targetTime = Time.realtimeSinceStartup + EventDrivenUtils.Settings.SignalGetterTimeout;
@@ -36,14 +37,14 @@ namespace AceLand.EventDriven.EventSignal
                         return signal;
                     case 2:
                         msg = $"Get Signal [{id}] fail: wrong type";
-                        throw new Exception(msg);
+                        throw new SignalTypeErrorException(msg);
                 }
 
                 await Task.Yield();
             }
 
             msg = $"Signal [{id}] is not found";
-            throw new Exception(msg);
+            throw new SignalNotFoundException(msg);
         }
     }
 }

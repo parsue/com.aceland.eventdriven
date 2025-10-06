@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Optional;
 
@@ -7,69 +6,39 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal<T>
     {
-        public static ISignalBuilder Builder() => new SignalBuilder();
-        
-        public interface ISignalBuilder
+        public interface ISignalFinalBuilder<TValue>
         {
-            Signal<T> Build();
-            ISignalBuilder WithId(string id);
-            ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
-            ISignalBuilder WithValue(T value);
-            ISignalBuilder WithListener(Action<T> listener);
-            ISignalBuilder WithListeners(params Action<T>[] listeners);
-            ISignalBuilder WithForceReadonly();
+            Signal<TValue> Build();
+            Signal<TValue> BuildReadonly();
         }
 
-        private class SignalBuilder : ISignalBuilder
+        internal class SignalBuilder<TValue> : ISignalFinalBuilder<TValue>
         {
-            private Option<string> _id = Option<string>.None();
-            private readonly List<Action<T>> _listeners = new();
-            private T _value;
-            private bool _forceReadonly;
+            internal SignalBuilder(Option<string> id, TValue value)
+            {
+                _id = id;
+                _value = value;
+            }
+            
+            private Option<string> _id;
+            private readonly TValue _value;
 
-            public Signal<T> Build()
+            public Signal<TValue> Build()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
-                var observers = new Observers<T>(_listeners.ToArray());
-                var signal = new Signal<T>(id, observers, _value, _forceReadonly);
+                var observers = new Observers<TValue>();
+                var signal = new Signal<TValue>(id, observers, _value, false);
                 Signals.RegistrySignal(signal);
                 return signal;
             }
 
-            public ISignalBuilder WithId(string id)
+            public Signal<TValue> BuildReadonly()
             {
-                _id = id.ToOption();
-                return this;
-            }
-
-            public ISignalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum
-            {
-                _id = id.ToString().ToOption();
-                return this;
-            }
-
-            public ISignalBuilder WithValue(T value)
-            {
-                _value = value;
-                return this;
-            }
-
-            public ISignalBuilder WithListener(Action<T> listener)
-            {
-                _listeners.Add(listener);
-                return this;
-            }
-
-            public ISignalBuilder WithListeners(params Action<T>[] listeners)
-            {
-                _listeners.AddRange(listeners);
-                return this;
-            }
-
-            public ISignalBuilder WithForceReadonly()
-            {
-                _forceReadonly = true;
-                return this;
+                var id = _id.Reduce(Guid.NewGuid().ToString);
+                var observers = new Observers<TValue>();
+                var signal = new Signal<TValue>(id, observers, _value, true);
+                Signals.RegistrySignal(signal);
+                return signal;
             }
         }
     }
