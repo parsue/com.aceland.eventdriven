@@ -11,6 +11,12 @@ namespace AceLand.EventDriven.Bus
         private static readonly Dictionary<Type, Delegate> eventsWithPayload = new();
         // latest IEventData <IEvent, EventCache>
         private static readonly Dictionary<Type, EventCache> eventCache = new();
+
+        public static void ClearCache<T>() where T : IEvent =>
+            events.Remove(typeof(T));
+        
+        public static void ClearAllCache() =>
+            events.Clear();
         
         // user entrance to raise event or subscribe listener
         public static EventBusBuilders.IEventBusBuilder Event<T>()
