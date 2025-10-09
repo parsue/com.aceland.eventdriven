@@ -21,6 +21,8 @@ namespace AceLand.EventDriven.EventSignal
 
         public void RemoveListener(Action<T> listener) =>
             _refSignal.RemoveListener(listener);
+        
+        public void Trigger() => _refSignal.Trigger();
 
         public override string ToString() => Value.ToString();
         
