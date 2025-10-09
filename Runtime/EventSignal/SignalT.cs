@@ -52,5 +52,6 @@ namespace AceLand.EventDriven.EventSignal
             other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
             
         public static implicit operator T(Signal<T> signal) => signal.Value;
+        public static implicit operator ReadonlySignal<T>(Signal<T> signal) => new(signal);
     }
 }
