@@ -1,4 +1,5 @@
-﻿using AceLand.EventDriven.EventSignal.Core;
+﻿using System;
+using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Disposable;
 
 namespace AceLand.EventDriven.EventSignal
@@ -19,6 +20,7 @@ namespace AceLand.EventDriven.EventSignal
         {
             Signals.UnRegistrySignal(this);
             _observers.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

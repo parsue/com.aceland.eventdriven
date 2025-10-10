@@ -1,8 +1,7 @@
 ﻿namespace AceLand.EventDriven.EventSignal.Core
 {
-    public interface IReadonlySignal<out T>
+    public interface IEventSignal
     {
         string Id { get; }
-        T Value { get; }
     }
 }

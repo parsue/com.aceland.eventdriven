@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using AceLand.EventDriven.EventSignal.Core;
 
 namespace AceLand.EventDriven.EventSignal
@@ -41,17 +40,7 @@ namespace AceLand.EventDriven.EventSignal
             _observers.Trigger(Value);
 
         public override string ToString() => Value.ToString();
-        
-        public bool CompareTo(T other) => 
-            other != null && Comparer<T>.Default.Compare(Value, other) == 0;
-        
-        public bool CompareTo(Signal<T> other) => 
-            other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
-
-        public bool CompareTo(ReadonlySignal<T> other) => 
-            other != null && Comparer<T>.Default.Compare(Value, other.Value) == 0;
             
         public static implicit operator T(Signal<T> signal) => signal.Value;
-        public static implicit operator ReadonlySignal<T>(Signal<T> signal) => new(signal);
     }
 }

@@ -8,8 +8,8 @@ namespace AceLand.EventDriven.EventSignal
     {
         public interface ISignalFinalBuilder<TValue>
         {
-            Signal<TValue> Build();
-            Signal<TValue> BuildReadonly();
+            ISignal<TValue> Build();
+            IReadonlySignal<TValue> BuildReadonly();
         }
 
         internal class SignalBuilder<TValue> : ISignalFinalBuilder<TValue>
@@ -23,20 +23,17 @@ namespace AceLand.EventDriven.EventSignal
             private Option<string> _id;
             private readonly TValue _value;
 
-            public Signal<TValue> Build()
+            public ISignal<TValue> Build() =>
+                BuildSignal();
+
+            public IReadonlySignal<TValue> BuildReadonly() =>
+                SignalExtension.AsReadonly<TValue>(BuildSignal());
+
+            private ISignal<TValue> BuildSignal()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
                 var observers = new Observers<TValue>();
                 var signal = new Signal<TValue>(id, observers, _value, false);
-                Signals.RegistrySignal(signal);
-                return signal;
-            }
-
-            public Signal<TValue> BuildReadonly()
-            {
-                var id = _id.Reduce(Guid.NewGuid().ToString);
-                var observers = new Observers<TValue>();
-                var signal = new Signal<TValue>(id, observers, _value, true);
                 Signals.RegistrySignal(signal);
                 return signal;
             }

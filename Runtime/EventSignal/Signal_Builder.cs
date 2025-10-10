@@ -21,14 +21,14 @@ namespace AceLand.EventDriven.EventSignal
         
         public interface ISignalFinalBuilder : ISignalValueBuilder
         {
-            Signal Build();
+            ISignal Build();
         }
         
         private class SignalBuilder : ISignalBuilder, ISignalFinalBuilder
         {
             private Option<string> _id = Option<string>.None();
 
-            public Signal Build()
+            public ISignal Build()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
                 var observers = new Observers();

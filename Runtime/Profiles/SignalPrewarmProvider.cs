@@ -1,6 +1,7 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal;
 using UnityEngine;
+using Signal = AceLand.EventDriven.EventSignal.Signal;
 
 namespace AceLand.EventDriven.Profiles
 {
@@ -11,16 +12,15 @@ namespace AceLand.EventDriven.Profiles
         [SerializeField] protected TId signalId;
         [SerializeField] protected TValue signalValue;
 
-        public Signal<TValue> GetSignal() => _signal;
-        private Signal<TValue> _signal;
+        public ISignal<TValue> GetSignal() => _signal;
+        private ISignal<TValue> _signal;
         
         public override void PrewarmSignal()
         {
-            var idBuilder = Signal.Builder()
+            _signal = Signal.Builder()
                 .WithId(signalId)
-                .WithValue(signalValue);
-            
-            idBuilder.Build();
+                .WithValue(signalValue)
+                .Build();
         }
 
         public override void Dispose()
@@ -35,8 +35,8 @@ namespace AceLand.EventDriven.Profiles
         [Header("Signal Prewarm Provider")]
         [SerializeField] protected TId signalId;
 
-        public Signal GetSignal() => _signal;
-        private Signal _signal;
+        public ISignal GetSignal() => _signal;
+        private ISignal _signal;
         
         public override void PrewarmSignal()
         {

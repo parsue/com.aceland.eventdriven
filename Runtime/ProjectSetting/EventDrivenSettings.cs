@@ -8,11 +8,9 @@ namespace AceLand.EventDriven.ProjectSetting
     public class EventDrivenSettings : ProjectSettings<EventDrivenSettings>
     {
         [Header("Event Signal")] 
-        [SerializeField] private bool swapSignalOnSameId;
         [SerializeField, Min(0.1f)] private float signalGetterTimeout = 1.5f;
         [SerializeField] private SignalProviderBase[] prewarmProviders = Array.Empty<SignalProviderBase>();
 
-        internal bool SwapSignalOnSameId => swapSignalOnSameId;
         internal float SignalGetterTimeout => signalGetterTimeout;
         internal ReadOnlySpan<SignalProviderBase> PrewarmProviders => prewarmProviders;
     }

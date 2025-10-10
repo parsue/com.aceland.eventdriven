@@ -24,6 +24,8 @@ namespace AceLand.EventDriven.EventSignal
             _observers.Clear();
         }
 
+        public override string ToString() => Id;
+
         public void Trigger() => 
             _observers.Trigger();
     }
