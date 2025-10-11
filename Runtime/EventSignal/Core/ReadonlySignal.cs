@@ -4,13 +4,18 @@ namespace AceLand.EventDriven.EventSignal.Core
 {
     public class ReadonlySignal<T> : IReadonlySignal<T>
     {
-        internal ReadonlySignal(ISignal<T> refSignal) =>
+        internal static ReadonlySignal<T> Build(ISignal<T> refSignal) =>
+            new(refSignal);
+        
+        private ReadonlySignal(ISignal<T> refSignal) =>
             _refSignal = refSignal;
 
-        public string Id => _refSignal.Id;
-        public T Value => _refSignal.Value ?? default;
-
+        ISignal<T> IEventSignalRef<T>.RefSignal => _refSignal;
         private readonly ISignal<T> _refSignal;
+
+        public string Id => _refSignal.Id;
+
+        public T Value => _refSignal.Value ?? default;
 
         public void AddListener(Action<T> listener, bool runImmediately = false) =>
             _refSignal.AddListener(listener, runImmediately);
@@ -20,9 +25,5 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         public void RemoveAllListeners() =>
             _refSignal.RemoveAllListeners();
-
-        public void Trigger() => _refSignal.Trigger();
-
-        public override string ToString() => Value.ToString();
     }
 }

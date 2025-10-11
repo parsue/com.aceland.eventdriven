@@ -15,7 +15,7 @@ namespace AceLand.EventDriven.EventSignal
             Signals.TryGetSignal(id, out Signal<T> signal) == 0 ? signal.AsReadonly() : null;
         public static ISignalListener<T> GetAsListener(string id) =>
             Signals.TryGetSignal(id, out Signal<T> signal) == 0 ? signal.AsListener() : null;
-        public static ISignalTrigger GetAsTrigger(string id) =>
+        public static ISignalTrigger<T> GetAsTrigger(string id) =>
             Signals.TryGetSignal(id, out Signal<T> signal) == 0 ? signal.AsTrigger() : null;
         
         public static ISignal<T> Get<TEnum>(TEnum id) where TEnum: Enum =>
@@ -24,7 +24,7 @@ namespace AceLand.EventDriven.EventSignal
             GetAsReadonly(id.ToString());
         public static ISignalListener<T> GetAsListener<TEnum>(TEnum id) where TEnum: Enum =>
             GetAsListener(id.ToString());
-        public static ISignalTrigger GetAsTrigger<TEnum>(TEnum id) where TEnum: Enum =>
+        public static ISignalTrigger<T> GetAsTrigger<TEnum>(TEnum id) where TEnum: Enum =>
             GetAsTrigger(id.ToString());
 
         public static Task<ISignal<T>> GetAsync(string id) =>
@@ -33,7 +33,7 @@ namespace AceLand.EventDriven.EventSignal
             GetReadonlySignalAsync(id);
         public static Promise<ISignalListener<T>> GetAsListenerAsync(string id) =>
             GetSignalListenerAsync(id);
-        public static Promise<ISignalTrigger> GetAsTriggerAsync(string id) =>
+        public static Promise<ISignalTrigger<T>> GetAsTriggerAsync(string id) =>
             GetSignalTriggerAsync(id);
         
         public static Promise<ISignal<T>> GetAsync<TEnum>(TEnum id) where TEnum: Enum =>
@@ -42,7 +42,7 @@ namespace AceLand.EventDriven.EventSignal
             GetAsReadonlyAsync(id.ToString());
         public static Promise<ISignalListener<T>> GetAsListenerAsync<TEnum>(TEnum id) where TEnum: Enum =>
             GetAsListenerAsync(id.ToString());
-        public static Promise<ISignalTrigger> GetAsTriggerAsync<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Promise<ISignalTrigger<T>> GetAsTriggerAsync<TEnum>(TEnum id) where TEnum: Enum =>
             GetAsTriggerAsync(id.ToString());
 
         private static async Task<ISignal<T>> GetSignalAsync(string id)
@@ -85,7 +85,7 @@ namespace AceLand.EventDriven.EventSignal
             return signal.AsListener();
         }
         
-        private static async Task<ISignalTrigger> GetSignalTriggerAsync(string id)
+        private static async Task<ISignalTrigger<T>> GetSignalTriggerAsync(string id)
         {
             var signal = await GetSignalAsync(id);
             return signal.AsTrigger();

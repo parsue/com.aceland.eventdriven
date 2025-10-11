@@ -1,6 +1,8 @@
-﻿namespace AceLand.EventDriven.EventSignal
+﻿using AceLand.EventDriven.EventSignal.Core;
+
+namespace AceLand.EventDriven.EventSignal
 {
-    public interface IReadonlySignal<out T> : ISignalListener<T>
+    public interface IReadonlySignal<T> : ISignalListener<T>
     {
         T Value { get; }
         string ToString();

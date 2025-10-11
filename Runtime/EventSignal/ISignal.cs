@@ -1,15 +1,29 @@
+using System;
+using AceLand.EventDriven.EventSignal.Core;
+
 namespace AceLand.EventDriven.EventSignal
 {
-    public interface ISignal : ISignalListener
+    public interface ISignal : IEventSignal
     {
-        string ToString();
         void Dispose();
+        
+        void AddListener(Action listener, bool runImmediately = false);
+        void RemoveListener(Action listener);
+        void RemoveAllListeners();
+        
+        void Trigger();
     }
 
-    public interface ISignal<T> : ISignalListener<T>
+    public interface ISignal<T> : IEventSignal
     {
         T Value { get; set; }
-        string ToString();
+        
         void Dispose();
+        
+        void AddListener(Action<T> listener, bool runImmediately = false);
+        void RemoveListener(Action<T> listener);
+        void RemoveAllListeners();
+        
+        void Trigger();
     }
 }

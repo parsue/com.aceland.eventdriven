@@ -7,6 +7,7 @@ namespace AceLand.EventDriven.EventSignal
     {
         public string Id { get; }
         private readonly Observers _observers;
+        private ISignal refSignal;
 
         public void AddListener(Action listener, bool runImmediately = false)
         {

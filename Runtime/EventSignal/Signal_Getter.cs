@@ -11,11 +11,11 @@ namespace AceLand.EventDriven.EventSignal
     public partial class Signal
     {
         public static ISignal Get(string id) =>
-            Signals.TryGetSignal(id, out EventSignal.Signal signal) == 0 ? signal : null;
+            Signals.TryGetSignal(id, out Signal signal) == 0 ? signal : null;
         public static ISignalListener GetAsListener(string id) =>
-            Signals.TryGetSignal(id, out EventSignal.Signal signal) == 0 ? signal : null;
+            Signals.TryGetSignal(id, out Signal signal) == 0 ? signal.AsListener() : null;
         public static ISignalTrigger GetAsTrigger(string id) =>
-            Signals.TryGetSignal(id, out EventSignal.Signal signal) == 0 ? signal : null;
+            Signals.TryGetSignal(id, out Signal signal) == 0 ? signal.AsTrigger() : null;
         
         public static ISignal Get<TEnum>(TEnum id) where TEnum: Enum =>
             Get(id.ToString());
