@@ -20,7 +20,6 @@ namespace AceLand.EventDriven
 
         private static void InitEventBus()
         {
-            // Discover all interfaces that implement IEvent
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var iEvent = typeof(IEvent);
 
@@ -33,10 +32,8 @@ namespace AceLand.EventDriven
                 .Where(t => t != null && t.IsInterface && iEvent.IsAssignableFrom(t) && t != iEvent)
                 .ToArray();
 
-            // Register event signatures into the bus
             EventBus.BootstrapRegister(eventInterfaces);
 
-            // Optionally: log discovered listeners (classes implementing these interfaces)
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             var listenerTypes = assemblies
                 .SelectMany(a =>

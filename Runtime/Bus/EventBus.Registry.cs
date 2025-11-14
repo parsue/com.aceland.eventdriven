@@ -1,38 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 using ZLinq;
 
 namespace AceLand.EventDriven.Bus
 {
-    public static class EventBus
+    public static partial class EventBus
     {
         private static readonly object @lock = new();
-
-        private static readonly Dictionary<Type, EventSignature> signatures = new();
         private static readonly Dictionary<Type, Delegate> listeners = new();
         private static readonly Dictionary<Type, Dictionary<object, Delegate>> instanceDelegates = new();
-        private static readonly Dictionary<Type, EventCache> eventCache = new();
-
-        public static EventBusBuilders.IEventBusBuilder Event<TEvent>() where TEvent : IEvent
-        {
-            EnsureIsEventInterface(typeof(TEvent));
-            return new EventBusBuilders.EventBusBuilder<TEvent>(null);
-        }
-
-        public static EventBusBuilders.IEventBusObjBuilder Event(object listenerInstance)
-        {
-            if (listenerInstance == null) throw new ArgumentNullException(nameof(listenerInstance));
-            return new EventBusBuilders.MultiEventBusBuilder(listenerInstance);
-        }
-
-        public static EventBusBuilders.IEventBusObjBuilder Event<TEvent>(object listenerInstance) where TEvent : IEvent
-        {
-            EnsureIsEventInterface(typeof(TEvent));
-            if (listenerInstance == null) throw new ArgumentNullException(nameof(listenerInstance));
-            return new EventBusBuilders.EventBusBuilder<TEvent>(listenerInstance);
-        }
 
         internal static void SubscribeInstance(Type eventType, object instance)
         {
@@ -54,6 +31,7 @@ namespace AceLand.EventDriven.Bus
                     map = new Dictionary<object, Delegate>(ReferenceEqualityComparer.Instance);
                     instanceDelegates[eventType] = map;
                 }
+
                 map[instance] = Delegate.Combine(map.GetValueOrDefault(instance), del);
             }
         }
@@ -67,7 +45,7 @@ namespace AceLand.EventDriven.Bus
             {
                 if (!instanceDelegates.TryGetValue(eventType, out var map)) return;
                 if (!map.TryGetValue(instance, out var instanceDel)) return;
-                
+
                 if (listeners.TryGetValue(eventType, out var master))
                 {
                     master = Delegate.Remove(master, instanceDel);
@@ -87,10 +65,8 @@ namespace AceLand.EventDriven.Bus
             lock (@lock)
             {
                 var toUpdate = new List<Type>();
-                foreach (var kv in instanceDelegates)
+                foreach (var (eventType, map) in instanceDelegates)
                 {
-                    var eventType = kv.Key;
-                    var map = kv.Value;
                     if (!map.TryGetValue(instance, out var instanceDel)) continue;
 
                     if (listeners.TryGetValue(eventType, out var master))
@@ -137,7 +113,7 @@ namespace AceLand.EventDriven.Bus
                     listeners[typeof(TEvent)] = listener;
             }
         }
-        
+
         internal static void KickStartInstance(Type eventType, object instance)
         {
             if (eventType == null) throw new ArgumentNullException(nameof(eventType));
@@ -181,7 +157,8 @@ namespace AceLand.EventDriven.Bus
                         (del as Action<object>)?.Invoke(cache.Sender);
                         break;
                     case EventSignatureKind.SinglePayload:
-                        var mi = typeof(EventBus).GetMethod(nameof(InvokeWithObjectPayload), BindingFlags.NonPublic | BindingFlags.Static);
+                        var mi = typeof(EventBus).GetMethod(nameof(InvokeWithObjectPayload),
+                            BindingFlags.NonPublic | BindingFlags.Static);
                         if (mi == null) break;
                         var gmi = mi.MakeGenericMethod(sig.PayloadTypeOrNull);
                         gmi.Invoke(null, new[] { del, cache.Sender, cache.EventData });
@@ -225,34 +202,6 @@ namespace AceLand.EventDriven.Bus
             }
         }
 
-        public static void ClearCache<TEvent>() where TEvent : IEvent
-        {
-            lock (@lock) eventCache.Remove(typeof(TEvent));
-        }
-
-        public static void ClearAllCache()
-        {
-            lock (@lock) eventCache.Clear();
-        }
-
-        internal static void BootstrapRegister(IEnumerable<Type> eventInterfaces)
-        {
-            lock (@lock)
-            {
-                signatures.Clear();
-                listeners.Clear();
-                instanceDelegates.Clear();
-                eventCache.Clear();
-
-                foreach (var it in eventInterfaces)
-                {
-                    var sig = BuildSignature(it);
-                    if (sig == null) continue;
-                    signatures[it] = sig;
-                }
-            }
-        }
-
         private static void EnsureIsEventInterface(Type t)
         {
             if (t is not { IsInterface: true } || !typeof(IEvent).IsAssignableFrom(t))
@@ -261,55 +210,17 @@ namespace AceLand.EventDriven.Bus
 
         private static EventSignature GetOrThrowSignature(Type eventInterface)
         {
-            return signatures.TryGetValue(eventInterface, out var sig) 
-                ? sig 
-                : throw new InvalidOperationException($"Event interface {eventInterface.Name} is not registered. Ensure bootstrap ran.");
-        }
-
-        private static EventSignature BuildSignature(Type eventInterface)
-        {
-            EnsureIsEventInterface(eventInterface);
-
-            var methods = eventInterface.GetMethods();
-            if (methods.Length != 1)
-            {
-                Debug.LogError($"Event interface {eventInterface.Name} must declare exactly one method.");
-                return null;
-            }
-
-            var m = methods[0];
-            if (m.ReturnType != typeof(void))
-            {
-                Debug.LogError($"Event method {eventInterface.Name}.{m.Name} must return void.");
-                return null;
-            }
-
-            var pars = m.GetParameters();
-            switch (pars.Length)
-            {
-                case 1 when pars[0].ParameterType != typeof(object):
-                    Debug.LogError($"First parameter of {eventInterface.Name}.{m.Name} must be object sender.");
-                    return null;
-                case 1:
-                    return new EventSignature(eventInterface, m, EventSignatureKind.NoPayload, null);
-                case 2 when pars[0].ParameterType != typeof(object):
-                    Debug.LogError($"First parameter of {eventInterface.Name}.{m.Name} must be object sender.");
-                    return null;
-                case 2:
-                {
-                    var payloadType = pars[1].ParameterType;
-                    return new EventSignature(eventInterface, m, EventSignatureKind.SinglePayload, payloadType);
-                }
-                default:
-                    Debug.LogError($"Event method {eventInterface.Name}.{m.Name} must have 1 or 2 parameters.");
-                    return null;
-            }
+            return signatures.TryGetValue(eventInterface, out var sig)
+                ? sig
+                : throw new InvalidOperationException(
+                    $"Event interface {eventInterface.Name} is not registered. Ensure bootstrap ran.");
         }
 
         private static Delegate BindInstanceDelegate(EventSignature sig, object instance)
         {
             if (!sig.EventInterfaceType.IsAssignableFrom(instance.GetType()))
-                throw new InvalidOperationException($"{instance.GetType().Name} does not implement {sig.EventInterfaceType.Name}.");
+                throw new InvalidOperationException(
+                    $"{instance.GetType().Name} does not implement {sig.EventInterfaceType.Name}.");
 
             var targetMethod = ResolveImplementationMethod(instance.GetType(), sig.EventInterfaceType, sig.Method);
 
@@ -319,15 +230,18 @@ namespace AceLand.EventDriven.Bus
             }
             else
             {
-                var helper = typeof(EventBus).GetMethod(nameof(CreateTwoParamAction), BindingFlags.NonPublic | BindingFlags.Static);
-                if (helper == null) 
-                    throw new InvalidOperationException($"{instance.GetType().Name} does not implement {sig.EventInterfaceType.Name}.");
+                var helper = typeof(EventBus).GetMethod(nameof(CreateTwoParamAction),
+                    BindingFlags.NonPublic | BindingFlags.Static);
+                if (helper == null)
+                    throw new InvalidOperationException(
+                        $"{instance.GetType().Name} does not implement {sig.EventInterfaceType.Name}.");
                 var closed = helper.MakeGenericMethod(sig.PayloadTypeOrNull);
                 return (Delegate)closed.Invoke(null, new[] { instance, targetMethod });
             }
         }
 
-        private static MethodInfo ResolveImplementationMethod(Type concreteType, Type interfaceType, MethodInfo interfaceMethod)
+        private static MethodInfo ResolveImplementationMethod(Type concreteType, Type interfaceType,
+            MethodInfo interfaceMethod)
         {
             var map = concreteType.GetInterfaceMap(interfaceType);
             for (var i = 0; i < map.InterfaceMethods.Length; i++)
@@ -338,9 +252,11 @@ namespace AceLand.EventDriven.Bus
 
             var name = interfaceMethod.Name;
             var pars = interfaceMethod.GetParameters().AsValueEnumerable().Select(p => p.ParameterType).ToArray();
-            var impl = concreteType.GetMethod(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, pars, null);
-            return impl == null 
-                ? throw new MissingMethodException($"Cannot find implementation for {interfaceType.Name}.{name} on {concreteType.Name}.") 
+            var impl = concreteType.GetMethod(name,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, pars, null);
+            return impl == null
+                ? throw new MissingMethodException(
+                    $"Cannot find implementation for {interfaceType.Name}.{name} on {concreteType.Name}.")
                 : impl;
         }
 
@@ -359,12 +275,5 @@ namespace AceLand.EventDriven.Bus
         {
             SendCacheToDelegate<TEvent, TPayload>(listener);
         }
-    }
-
-    internal sealed class ReferenceEqualityComparer : IEqualityComparer<object>
-    {
-        public static readonly ReferenceEqualityComparer Instance = new();
-        public new bool Equals(object x, object y) => ReferenceEquals(x, y);
-        public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
     }
 }
