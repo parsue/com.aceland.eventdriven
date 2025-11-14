@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AceLand.EventDriven.Bus
+namespace AceLand.EventDriven.Bus.Core
 {
     internal sealed class ReferenceEqualityComparer : IEqualityComparer<object>
     {

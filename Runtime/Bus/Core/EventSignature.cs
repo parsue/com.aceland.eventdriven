@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace AceLand.EventDriven.Bus
+namespace AceLand.EventDriven.Bus.Core
 {
     internal sealed class EventSignature
     {

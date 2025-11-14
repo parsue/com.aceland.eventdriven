@@ -1,7 +1,7 @@
 ﻿using System;
 using ZLinq;
 
-namespace AceLand.EventDriven.Bus
+namespace AceLand.EventDriven.Bus.Builders
 {
     public static class EventBusBuilders
     {
@@ -42,10 +42,10 @@ namespace AceLand.EventDriven.Bus
 
                 EventBus.SubscribeInstance(typeof(TEvent), _instanceOrNull);
 
-                return new KickStartInstanceBuilder(() => { /* no-op */ }, () =>
-                {
-                    EventBus.KickStartInstance(typeof(TEvent), _instanceOrNull);
-                });
+                return new KickStartInstanceBuilder(
+                    onDone: () => { },
+                    onKickStart: () => EventBus.KickStartInstance(typeof(TEvent), _instanceOrNull)
+                );
             }
 
             public void Unlisten()
@@ -108,13 +108,13 @@ namespace AceLand.EventDriven.Bus
                     EventBus.SubscribeInstance(ev, _instance);
                 }
 
-                return new KickStartInstanceBuilder(() => { /* no-op */ }, () =>
-                {
-                    foreach (var ev in _eventInterfaces)
+                return new KickStartInstanceBuilder(
+                    onDone: () => { },
+                    onKickStart: () =>
                     {
-                        EventBus.KickStartInstance(ev, _instance);
-                    }
-                });
+                        foreach (var ev in _eventInterfaces)
+                            EventBus.KickStartInstance(ev, _instance);
+                    });
             }
 
             public void Unlisten()
