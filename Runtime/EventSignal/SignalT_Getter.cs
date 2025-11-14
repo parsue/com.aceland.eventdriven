@@ -27,7 +27,7 @@ namespace AceLand.EventDriven.EventSignal
         public static ISignalTrigger<T> GetAsTrigger<TEnum>(TEnum id) where TEnum: Enum =>
             GetAsTrigger(id.ToString());
 
-        public static Task<ISignal<T>> GetAsync(string id) =>
+        public static Promise<ISignal<T>> GetAsync(string id) =>
             GetSignalAsync(id); 
         public static Promise<IReadonlySignal<T>> GetAsReadonlyAsync(string id) =>
             GetReadonlySignalAsync(id);

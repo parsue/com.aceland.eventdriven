@@ -1,4 +1,4 @@
-﻿namespace AceLand.EventDriven.Bus
+﻿namespace AceLand.EventDriven.Bus.Core
 {
     public struct EventCache
     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using AceLand.EventDriven.Bus.Builders;
 
 namespace AceLand.EventDriven.Bus
 {
@@ -24,15 +25,17 @@ namespace AceLand.EventDriven.Bus
                 ? throw new ArgumentNullException(nameof(listenerInstance))
                 : new EventBusBuilders.EventBusBuilder<TEvent>(listenerInstance);
         }
-        
+
         public static void ClearCache<TEvent>() where TEvent : IEvent
         {
-            ClearEventCache<TEvent>();
+            Cache.ClearEventCache(typeof(TEvent));
         }
 
         public static void ClearAllCache()
         {
-            ClearAllEventCache();
+            Cache.ClearAllEventCache();
         }
+
+        // Internal helpers used by builders and API
     }
 }
