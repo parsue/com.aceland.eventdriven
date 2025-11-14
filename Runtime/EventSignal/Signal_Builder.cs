@@ -8,7 +8,7 @@ namespace AceLand.EventDriven.EventSignal
     {
         public static ISignalBuilder Builder() => new SignalBuilder();
         
-        public interface ISignalBuilder
+        public interface ISignalBuilder : ISignalValueBuilder
         {
             ISignalFinalBuilder WithId(string id);
             ISignalFinalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
@@ -17,6 +17,7 @@ namespace AceLand.EventDriven.EventSignal
         public interface ISignalValueBuilder
         {
             Signal<T>.ISignalFinalBuilder<T> WithValue<T>(T value);
+            Signal<T>.ISignalFinalBuilder<T> WithValue<T>();
         }
         
         public interface ISignalFinalBuilder : ISignalValueBuilder
@@ -52,6 +53,11 @@ namespace AceLand.EventDriven.EventSignal
             public Signal<T>.ISignalFinalBuilder<T> WithValue<T>(T value)
             {
                 return new Signal<T>.SignalBuilder<T>(_id, value);
+            }
+
+            public Signal<T>.ISignalFinalBuilder<T> WithValue<T>()
+            {
+                return new Signal<T>.SignalBuilder<T>(_id, default);
             }
         }
     }
