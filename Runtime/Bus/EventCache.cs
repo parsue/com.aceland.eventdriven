@@ -1,6 +1,5 @@
 ﻿namespace AceLand.EventDriven.Bus
 {
-    // storage latest event data
     public struct EventCache
     {
         public readonly object Sender;

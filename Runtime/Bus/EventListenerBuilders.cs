@@ -6,57 +6,51 @@ namespace AceLand.EventDriven.Bus
     {
         public interface IEventKickStartBuilder : IEventListenerBuilder
         {
-            IEventListenerBuilder WithKickStart();
+            void KickStart();
         }
-        
+
         public interface IEventListenerBuilder
         {
-            void Listen();
+            IEventKickStartBuilder Listen();
         }
 
-        internal class EventBusListener<T> : IEventKickStartBuilder
-            where T : IEvent
+        internal class EventBusListener<TEvent> : IEventKickStartBuilder
+            where TEvent : IEvent
         {
             private readonly Action<object> _listener;
-            private bool _kickStart;
-            
-            public  EventBusListener(Action<object> listener) =>
-                _listener = listener;
 
-            public IEventListenerBuilder WithKickStart()
+            public EventBusListener(Action<object> listener) =>
+                _listener = listener ?? throw new ArgumentNullException(nameof(listener));
+
+            public IEventKickStartBuilder Listen()
             {
-                _kickStart = true;
+                EventBus.SubscribeDelegate<TEvent>(_listener);
                 return this;
             }
 
-            public void Listen()
+            public void KickStart()
             {
-                EventBus.Subscribe<T>(_listener);
-                if (!_kickStart) return;
-                EventBus.SendEventCache<T>(_listener);
+                EventBus.SendEventCache<TEvent>(_listener);
             }
         }
 
-        internal class EventBusListener<T, TPayload> : IEventKickStartBuilder
-            where T : IEvent
+        internal class EventBusListener<TEvent, TPayload> : IEventKickStartBuilder
+            where TEvent : IEvent
         {
             private readonly Action<object, TPayload> _listener;
-            private bool _kickStart;
-            
-            public  EventBusListener(Action<object, TPayload> listener) =>
-                _listener = listener;
 
-            public IEventListenerBuilder WithKickStart()
+            public EventBusListener(Action<object, TPayload> listener) =>
+                _listener = listener ?? throw new ArgumentNullException(nameof(listener));
+
+            public IEventKickStartBuilder Listen()
             {
-                _kickStart = true;
+                EventBus.SubscribeDelegate<TEvent, TPayload>(_listener);
                 return this;
             }
 
-            public void Listen()
+            public void KickStart()
             {
-                EventBus.Subscribe<T, TPayload>(_listener);
-                if (!_kickStart) return;
-                EventBus.SendEventCache<T, TPayload>(_listener);
+                EventBus.SendEventCache<TEvent, TPayload>(_listener);
             }
         }
     }
