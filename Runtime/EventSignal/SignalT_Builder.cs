@@ -14,17 +14,17 @@ namespace AceLand.EventDriven.EventSignal
 
         internal class SignalBuilder<TValue> : ISignalFinalBuilder<TValue>
         {
-            internal SignalBuilder(Option<string> id, TValue value, bool triggerOncePerFrame, PlayerLoopState triggerState)
+            internal SignalBuilder(Option<string> id, TValue value, SignalTriggerMethod triggerMethod, PlayerLoopState triggerState)
             {
                 _id = id;
                 _value = value;
-                _triggerOncePerFrame = triggerOncePerFrame;
+                _triggerMethod = triggerMethod;
                 _triggerState = triggerState;
             }
             
             private Option<string> _id;
             private readonly TValue _value;
-            private readonly bool _triggerOncePerFrame;
+            private readonly SignalTriggerMethod _triggerMethod;
             private readonly PlayerLoopState _triggerState;
 
             public ISignal<TValue> Build() =>
@@ -34,7 +34,7 @@ namespace AceLand.EventDriven.EventSignal
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
                 var observers = new Observers<TValue>();
-                var signal = new Signal<TValue>(id, observers, _value, _triggerOncePerFrame, _triggerState);
+                var signal = new Signal<TValue>(id, observers, _value, _triggerMethod, _triggerState);
                 Signals.RegistrySignal(signal);
                 return signal;
             }

@@ -4,6 +4,7 @@ using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.EventDriven.Exceptions;
 using AceLand.TaskUtils;
+using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -47,6 +48,9 @@ namespace AceLand.EventDriven.EventSignal
 
         private static async Task<ISignal<T>> GetSignalAsync(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                throw new ArgumentNullException(nameof(id));
+            
             var aliveToken = Promise.ApplicationAliveToken;
             var targetTime = DateTime.Now.AddSeconds(EventDrivenUtils.Settings.SignalGetterTimeout);
             string msg;
@@ -54,8 +58,9 @@ namespace AceLand.EventDriven.EventSignal
             while (!aliveToken.IsCancellationRequested && DateTime.Now < targetTime)
             {
                 await Task.Yield();
-                
+
                 var arg = Signals.TryGetSignal(id, out Signal<T> signal);
+                Debug.Log($"result: {arg}");
                 switch (arg)
                 {
                     case 0:
@@ -64,9 +69,13 @@ namespace AceLand.EventDriven.EventSignal
                     case 2:
                         msg = $"Get Signal [{id}] fail: wrong type";
                         throw new SignalTypeErrorException(msg);
+
+                    default:
+                        continue;
                 }
             }
 
+            Debug.Log(99);
             msg = $"Signal [{id}] is not found";
             throw new SignalNotFoundException(msg);
         }

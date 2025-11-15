@@ -36,14 +36,14 @@ namespace AceLand.EventDriven.EventSignal
         private class SignalBuilder : ISignalBuilder
         {
             private Option<string> _id = Option<string>.None();
-            private bool _triggerOncePerFrame = false;
+            private SignalTriggerMethod _triggerMethod = SignalTriggerMethod.Immediately;
             private PlayerLoopState _triggerState;
 
             public ISignal Build()
             {
                 var id = _id.Reduce(Guid.NewGuid().ToString);
                 var observers = new Observers();
-                var signal = new Signal(id, observers, _triggerOncePerFrame, _triggerState);
+                var signal = new Signal(id, observers, _triggerMethod, _triggerState);
                 Signals.RegistrySignal(signal);
                 return signal;
             }
@@ -62,26 +62,26 @@ namespace AceLand.EventDriven.EventSignal
 
             public ISignalFinalBuilder WithTriggerOncePerFrame()
             {
-                _triggerOncePerFrame = true;
+                _triggerMethod = SignalTriggerMethod.OncePerFrame;
                 _triggerState = EventDrivenUtils.Settings.SignalTriggerState;
                 return this;
             }
 
             public ISignalFinalBuilder WithTriggerOncePerFrame(PlayerLoopState triggerState)
             {
-                _triggerOncePerFrame = true;
+                _triggerMethod = SignalTriggerMethod.OncePerFrame;
                 _triggerState = triggerState;
                 return this;
             }
 
             public Signal<T>.ISignalFinalBuilder<T> WithValue<T>(T value)
             {
-                return new Signal<T>.SignalBuilder<T>(_id, value, _triggerOncePerFrame, _triggerState);
+                return new Signal<T>.SignalBuilder<T>(_id, value, _triggerMethod, _triggerState);
             }
 
             public Signal<T>.ISignalFinalBuilder<T> WithValue<T>()
             {
-                return new Signal<T>.SignalBuilder<T>(_id, default, _triggerOncePerFrame, _triggerState);
+                return new Signal<T>.SignalBuilder<T>(_id, default, _triggerMethod, _triggerState);
             }
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal.Core
 {
@@ -11,7 +12,7 @@ namespace AceLand.EventDriven.EventSignal.Core
             where T : IEventSignal
         {
             signal = default;
-            
+
             if (!signalsById.TryGetValue(id, out var value))
                 return 1;
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Disposable;
 using AceLand.PlayerLoopHack;
@@ -8,11 +7,11 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal : DisposableObject
     {
-        private Signal(string id, Observers observers, bool triggerOncePerFrame, PlayerLoopState triggerState)
+        private Signal(string id, Observers observers, SignalTriggerMethod triggerMethod, PlayerLoopState triggerState)
         {
             Id = id;
             _observers = observers;
-            _triggerOncePerFrame = triggerOncePerFrame;
+            _triggerMethod = triggerMethod;
             _triggerState = triggerState;
         }
 
