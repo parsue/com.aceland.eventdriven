@@ -3,6 +3,7 @@
     "rootNamespace": "AceLand.EventDriven",
     "references": [
         "GUID:0b6e3ff925df76b408774ed4b623807b",
+        "GUID:f6e29fd4e9e98494f91cfd818cc81d32",
         "GUID:1a972ba99344f904a9d50dc99b31faba"
     ],
     "includePlatforms": [],

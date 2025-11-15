@@ -1,17 +1,19 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.Library.Disposable;
+using AceLand.PlayerLoopHack;
 
 namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal<T> : DisposableObject
     {
-        private Signal(string id, Observers<T> observers, T value, bool forceReadonly)
+        private Signal(string id, Observers<T> observers, T value, SignalTriggerMethod triggerMethod, PlayerLoopState triggerState)
         {
             Id = id;
             _observers = observers;
             _value = value;
-            _forceReadonly = forceReadonly;
+            _triggerMethod = triggerMethod;
+            _triggerState = triggerState;
         }
 
         ~Signal() => Dispose(false);

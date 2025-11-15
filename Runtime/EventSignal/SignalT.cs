@@ -1,14 +1,20 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal.Core;
+using AceLand.PlayerLoopHack;
+using AceLand.TaskUtils;
+using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal<T> : ISignal<T>
     {
         public string Id { get; }
+
         private readonly Observers<T> _observers;
         private T _value;
-        private readonly bool _forceReadonly;
+        private readonly SignalTriggerMethod _triggerMethod;
+        private readonly PlayerLoopState _triggerState;
+        private bool _triggeredInThisFrame;
         
         public T Value
         {
@@ -36,8 +42,30 @@ namespace AceLand.EventDriven.EventSignal
             _observers.Clear();
         }
 
-        public void Trigger() => 
-            _observers.Trigger(Value);
+        public void Trigger()
+        {
+            switch (_triggerMethod)
+            {
+                case SignalTriggerMethod.Immediately:
+                    _observers.Trigger(_value);
+                    return;
+                
+                case SignalTriggerMethod.OncePerFrame:
+                    if (_triggeredInThisFrame) return;
+                    _triggeredInThisFrame = true;
+                    Promise.Dispatcher.Run(SystemTrigger, _triggerState);
+                    return;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void SystemTrigger()
+        {
+            _observers.Trigger(_value);
+            _triggeredInThisFrame = false;
+        }
 
         public override string ToString() => Value.ToString();
             
