@@ -1,5 +1,7 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal.Core;
+using AceLand.PlayerLoopHack;
+using AceLand.TaskUtils;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -8,7 +10,9 @@ namespace AceLand.EventDriven.EventSignal
         public string Id { get; }
         private readonly Observers<T> _observers;
         private T _value;
-        private readonly bool _forceReadonly;
+        private readonly bool _triggerOncePerFrame;
+        private readonly PlayerLoopState _triggerState;
+        private bool _triggeredInThisFrame;
         
         public T Value
         {
@@ -36,8 +40,19 @@ namespace AceLand.EventDriven.EventSignal
             _observers.Clear();
         }
 
-        public void Trigger() => 
-            _observers.Trigger(Value);
+        public void Trigger()
+        {
+            if (!_triggerOncePerFrame )
+            {
+                _observers.Trigger(_value);
+                return;
+            }
+            
+            if (_triggeredInThisFrame) return;
+            _triggeredInThisFrame = true;
+            Promise.Dispatcher.Run(() => _observers.Trigger(_value), _triggerState);
+            Promise.Dispatcher.Run(() => _triggeredInThisFrame = false, _triggerState.Previous());
+        }
 
         public override string ToString() => Value.ToString();
             

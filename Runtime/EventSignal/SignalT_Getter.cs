@@ -59,9 +59,7 @@ namespace AceLand.EventDriven.EventSignal
                 switch (arg)
                 {
                     case 0:
-                        if (!signal._forceReadonly) return signal;
-                        msg = $"Get Signal [{id}] fail: force readonly, use GetReadonly instead.";
-                        throw new SignalReadonlyAlertException(msg);
+                        return signal;
 
                     case 2:
                         msg = $"Get Signal [{id}] fail: wrong type";

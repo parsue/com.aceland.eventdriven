@@ -1,4 +1,5 @@
 using AceLand.EventDriven.ProjectSetting;
+using AceLand.PlayerLoopHack;
 using UnityEngine;
 
 namespace AceLand.EventDriven.Core
@@ -15,5 +16,13 @@ namespace AceLand.EventDriven.Core
         }
         
         private static EventDrivenSettings _settings;
+
+        public static PlayerLoopState PreviousState(PlayerLoopState state)
+        {
+            if (state is PlayerLoopState.TimeUpdate)
+                return PlayerLoopState.PostLateUpdate;
+
+            return state - 1;
+        }
     }
 }
