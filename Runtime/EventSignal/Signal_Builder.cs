@@ -9,6 +9,7 @@ namespace AceLand.EventDriven.EventSignal
     public partial class Signal
     {
         public static ISignalBuilder Builder() => new SignalBuilder();
+        public static ISignalLinkerBuilder LinkerBuilder() => new SignalLinkerBuilder();
         
         public interface ISignalBuilder : ISignalTriggerStateBuilder
         {
