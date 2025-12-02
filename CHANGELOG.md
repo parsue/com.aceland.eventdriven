@@ -2,7 +2,78 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+---
+
+## [2.1.5] - 2025-12-02
+### Add
+- [SignalLinker] a link up multiple Signal<T> for handle multiple signals condition
+- [Signal] add bool Disposed in all signal types
+
+## [2.1.4] - 2025-11-15
+### Fixed
+- [Dependency] com.aceland.taskutils version should be 2.0.3
+
+## [2.1.3] - 2025-11-15
+### Add
+- [Dependency] Player Loop Hack
+- [Project Settings] default signal trigger state for trigger once per frame, may changed in next frame
+- [Signal] default trigger immediate
+- [Signal Builder] WithTriggerOncePerFrame(PlayerLoopState) to trigger signal immediately
+### Remove
+- [Signal Builder] BuildReadonly will be removed, reasons:
+- IReadonlySignal cannot be disposed
+- signal permissions and conversion are completed
+
+## [2.1.2] - 2025-11-15
+### Fixed
+- [Signal] Signal<T>.GetAsync now return Promise<ISignal<T>>
+### Modified
+- [EventBus] internal optimize
+- [Signal.Builder] WithId can be ignore now, id will be a new guid
+
+## [2.1.1] - 2025-11-14
+### Modified
+- [EventBus] optimizing
+
+## [2.1.0] - 2025-11-14
+### Modified
+- [EventBus] simplify listener processes
+- [EventBus] force single listener function in IEvent
+- [EventBus] throw exception on wrong value type (or no value) on raising event
+
+## [2.0.4] - 2025-10-11
+### Added
+- [Signal] add conversion between signal types, read docs
+### Modified
+- [Signal] arrange permissions signal types
+- [Signal] protecting permissions of different types
+ 
+## [2.0.3] - 2025-10-10
+### Added
+- [Signal] Signal Trigger, Signal Listener
+### Modified
+- [Signal] returning interface instead of concrete object
+- [Signal] Get function refactoring to GetAs for different signal types
+### Removed
+- [Project Settings] Swap Signal option, not allow same id
+
+## [2.0.2] - 2025-10-09
+### Added
+- [Signal] Trigger to ReadonlySignal<T>
+
+## [2.0.1] - 2025-10-09
+### Added
+- [EventBus] clear cache function
+- [Signal] Signal<T> to ReadonlySignal<T> extension
+
+## [2.0.0] - 2025-10-06
+### Added
+- [Provider] Signal Prewarm Provider - build signals before scene load
+- [Exception] new exception type for GetAsync of Signal
+### Modified
+- [Builder] Signal builders are reconstructed
+### Removed
+- [Builder] Listener in Signal Builder
 
 ---
 
