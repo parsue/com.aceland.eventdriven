@@ -15,6 +15,8 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         public string Id => _refSignal.Id;
 
+        public bool Disposed => _refSignal.Disposed;
+
         public void AddListener(Action listener, bool runImmediately = false) =>
             _refSignal.AddListener(listener, runImmediately);
 
@@ -38,6 +40,8 @@ namespace AceLand.EventDriven.EventSignal.Core
         private readonly ISignal<T> _refSignal;
 
         public string Id => _refSignal.Id;
+
+        public bool Disposed => _refSignal.Disposed;
         public T Value => _refSignal.Value ?? default;
 
         public void AddListener(Action<T> listener, bool runImmediately = false) =>

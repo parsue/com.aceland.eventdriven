@@ -12,7 +12,8 @@
         private readonly ISignal _refSignal;
 
         public string Id => _refSignal.Id;
-        
+        public bool Disposed => _refSignal.Disposed;
+
         public void Trigger() => 
             _refSignal.Trigger();
     }
@@ -29,6 +30,7 @@
         private readonly ISignal<T> _refSignal;
 
         public string Id => _refSignal.Id;
+        public bool Disposed => _refSignal.Disposed;
         
         public void Trigger() => 
             _refSignal.Trigger();
