@@ -8,7 +8,7 @@ namespace AceLand.EventDriven.EventSignal.Core
     internal interface ISignalAdaptor
     {
         void Dispose();
-        void AddAdaptor<T>(ISignalListener<T> signalListener, Func<bool> result, Action linkerTrigger);
+        void AddAdaptor<T>(ISignalListener<T> signalListener, Predicate<T> result, Action linkerTrigger);
         AdaptorOption Option { get; }
         bool Result();
     }
@@ -37,7 +37,7 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         public AdaptorOption Option { get; }
 
-        public void AddAdaptor<T>(ISignalListener<T> signalListener, Func<bool> result, Action linkerTrigger)
+        public void AddAdaptor<T>(ISignalListener<T> signalListener, Predicate<T> result, Action linkerTrigger)
         {
             var adaptor = AdaptorData<T>.Create(signalListener, result);
             adaptor.AddLinkerTrigger(linkerTrigger);

@@ -45,7 +45,7 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         public void AddAdaptor<T>(
             ISignalListener<T> signalListener,
-            Func<bool> condition,
+            Predicate<T> condition,
             AdaptorOption option
         )
         {
@@ -55,6 +55,20 @@ namespace AceLand.EventDriven.EventSignal.Core
                 adaptors[option] = adaptor;
             }
             adaptor.AddAdaptor(signalListener, condition, Trigger);
+        }
+
+        public void AddAdaptor<T>(
+            ISignalListener<T> signalListener,
+            T conditionValue,
+            AdaptorOption option
+        )
+        {
+            if (!adaptors.TryGetValue(option, out var adaptor))
+            {
+                adaptor = SignalAdaptor.Create<T>(option);
+                adaptors[option] = adaptor;
+            }
+            adaptor.AddAdaptor(signalListener, v => EqualityComparer<T>.Default.Equals(v, conditionValue) , Trigger);
         }
 
         public void AddListener(Action<bool> listener, bool runImmediately = false)

@@ -1,4 +1,4 @@
-﻿namespace AceLand.EventDriven.EventSignal.Core
+﻿namespace AceLand.EventDriven.EventSignal
 {
     public enum AdaptorOption
     {

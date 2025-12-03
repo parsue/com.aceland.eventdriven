@@ -13,10 +13,10 @@ namespace AceLand.EventDriven.EventSignal.Core
 
     internal class AdaptorData<T> : DisposableObject, IAdaptorData
     {
-        internal static AdaptorData<T> Create(ISignalListener<T> signalListener, Func<bool> result) =>
+        internal static AdaptorData<T> Create(ISignalListener<T> signalListener, Predicate<T> result) =>
             new(signalListener, result);
         
-        private AdaptorData(ISignalListener<T> listener, Func<bool> getResult)
+        private AdaptorData(ISignalListener<T> listener, Predicate<T> getResult)
         {
             Listener = listener;
             GetResult = getResult;
@@ -40,7 +40,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         }
 
         private ISignalListener<T> Listener { get; }
-        private Func<bool> GetResult { get; }
+        private Predicate<T> GetResult { get; }
         private Action<T> trigger;
 
         public bool Result()
@@ -57,7 +57,7 @@ namespace AceLand.EventDriven.EventSignal.Core
                 return true;
             }
             
-            return GetResult?.Invoke() ?? false;
+            return GetResult?.Invoke(Listener.RefSignal.Value) ?? false;
         }
     }
 }

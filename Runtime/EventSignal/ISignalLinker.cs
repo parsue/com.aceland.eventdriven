@@ -7,7 +7,8 @@ namespace AceLand.EventDriven.EventSignal
     {
         void Dispose();
 
-        void AddAdaptor<T>(ISignalListener<T> signalListener, Func<bool> condition, AdaptorOption option);
+        void AddAdaptor<T>(ISignalListener<T> signalListener, Predicate<T> condition, AdaptorOption option);
+        void AddAdaptor<T>(ISignalListener<T> signalListener, T conditionValue, AdaptorOption option);
         
         void AddListener(Action<bool> listener, bool runImmediately = false);
         void RemoveListener(Action<bool> listener);
