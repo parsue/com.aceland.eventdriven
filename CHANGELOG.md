@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.1.6] - 2025-12-03
+### Modified
+- [SignalLinker] move AdaptorOption to upper level of namespace
+- [SignalAdaptor] with much handly add adaptor method now
+
 ## [2.1.5] - 2025-12-02
-### Add
+### Added
 - [SignalLinker] a link up multiple Signal<T> for handle multiple signals condition
 - [Signal] add bool Disposed in all signal types
 
