@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.1.7] - 2025-12-06
+### Modified
+- [package.json] add doc links
+
 ## [2.1.6] - 2025-12-03
 ### Modified
 - [SignalLinker] move AdaptorOption to upper level of namespace
