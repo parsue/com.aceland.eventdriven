@@ -10,41 +10,80 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal<T>
     {
-        public static ISignal<T> Get(string id) =>
-            Signals.TryGetSignal(id, out Signal<T> signal) == 0 ? signal : null;
-        public static IReadonlySignal<T> GetAsReadonly(string id) =>
-            Signals.TryGetSignal(id, out Signal<T> signal) == 0 ? signal.AsReadonly() : null;
-        public static ISignalListener<T> GetAsListener(string id) =>
-            Signals.TryGetSignal(id, out Signal<T> signal) == 0 ? signal.AsListener() : null;
-        public static ISignalTrigger<T> GetAsTrigger(string id) =>
-            Signals.TryGetSignal(id, out Signal<T> signal) == 0 ? signal.AsTrigger() : null;
+        public static bool TryGet(string id, out ISignal<T> signal)
+        {
+            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            {
+                signal = null;
+                return false;
+            } 
+            
+            signal = s;
+            return true;
+        }
         
-        public static ISignal<T> Get<TEnum>(TEnum id) where TEnum: Enum =>
-            Get(id.ToString());
-        public static IReadonlySignal<T> GetAsReadonly<TEnum>(TEnum id) where TEnum: Enum =>
-            GetAsReadonly(id.ToString());
-        public static ISignalListener<T> GetAsListener<TEnum>(TEnum id) where TEnum: Enum =>
-            GetAsListener(id.ToString());
-        public static ISignalTrigger<T> GetAsTrigger<TEnum>(TEnum id) where TEnum: Enum =>
-            GetAsTrigger(id.ToString());
+        public static bool TryGetReadonly(string id, out IReadonlySignal<T> readonlySignal)
+        {
+            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            {
+                readonlySignal = null;
+                return false;
+            } 
+            
+            readonlySignal = s.AsReadonly();
+            return true;
+        }
+
+        public static bool TryGetListener(string id, out ISignalListener<T> listener)
+        {
+            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            {
+                listener = null;
+                return false;
+            } 
+            
+            listener = s.AsListener();
+            return true;
+        }
+        
+        public static bool TryGetTrigger(string id, out ISignalTrigger<T> trigger)
+        {
+            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            {
+                trigger = null;
+                return false;
+            } 
+            
+            trigger = s.AsTrigger();
+            return true;
+        }
+        
+        public static bool TryGet<TEnum>(TEnum id, out ISignal<T> signal) where TEnum: Enum =>
+            TryGet(id.ToString(), out signal);
+        public static bool TryGetReadonly<TEnum>(TEnum id, out IReadonlySignal<T> readonlySignal) where TEnum: Enum =>
+            TryGetReadonly(id.ToString(), out readonlySignal);
+        public static bool TryGetListener<TEnum>(TEnum id, out ISignalListener<T> listener) where TEnum: Enum =>
+            TryGetListener(id.ToString(), out listener);
+        public static bool TryGetTrigger<TEnum>(TEnum id, out ISignalTrigger<T> trigger) where TEnum: Enum =>
+            TryGetTrigger(id.ToString(), out trigger);
 
         public static Promise<ISignal<T>> GetAsync(string id) =>
             GetSignalAsync(id); 
-        public static Promise<IReadonlySignal<T>> GetAsReadonlyAsync(string id) =>
+        public static Promise<IReadonlySignal<T>> GetReadonlyAsync(string id) =>
             GetReadonlySignalAsync(id);
-        public static Promise<ISignalListener<T>> GetAsListenerAsync(string id) =>
+        public static Promise<ISignalListener<T>> GetListenerAsync(string id) =>
             GetSignalListenerAsync(id);
-        public static Promise<ISignalTrigger<T>> GetAsTriggerAsync(string id) =>
+        public static Promise<ISignalTrigger<T>> GetTriggerAsync(string id) =>
             GetSignalTriggerAsync(id);
         
         public static Promise<ISignal<T>> GetAsync<TEnum>(TEnum id) where TEnum: Enum =>
             GetAsync(id.ToString()); 
-        public static Promise<IReadonlySignal<T>> GetAsReadonlyAsync<TEnum>(TEnum id) where TEnum: Enum =>
-            GetAsReadonlyAsync(id.ToString());
-        public static Promise<ISignalListener<T>> GetAsListenerAsync<TEnum>(TEnum id) where TEnum: Enum =>
-            GetAsListenerAsync(id.ToString());
-        public static Promise<ISignalTrigger<T>> GetAsTriggerAsync<TEnum>(TEnum id) where TEnum: Enum =>
-            GetAsTriggerAsync(id.ToString());
+        public static Promise<IReadonlySignal<T>> GetReadonlyAsync<TEnum>(TEnum id) where TEnum: Enum =>
+            GetReadonlyAsync(id.ToString());
+        public static Promise<ISignalListener<T>> GetListenerAsync<TEnum>(TEnum id) where TEnum: Enum =>
+            GetListenerAsync(id.ToString());
+        public static Promise<ISignalTrigger<T>> GetTriggerAsync<TEnum>(TEnum id) where TEnum: Enum =>
+            GetTriggerAsync(id.ToString());
 
         private static async Task<ISignal<T>> GetSignalAsync(string id)
         {
