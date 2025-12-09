@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [2.1.7] - 2025-12-06
+## [2.2.0] - 2025-12-10
+### Added
+- [Signal] TryGetLinker and GetLinkerAsync for getting ISignalLinker
+### Modified
+- [Signal] Get changed to TryGet
+- [Signal] GetAs changed to Get
+
+## [2.1.8] - 2025-12-06
 ### Modified
 - [package.json] add doc links
 
