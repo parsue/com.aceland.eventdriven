@@ -17,7 +17,10 @@ namespace AceLand.EventDriven.EventSignal.Core
                 return 1;
 
             if (value is not T signalAsT)
+            {
+                Debug.LogError($"Try Get Signal [{id}] Fail: type is not correct");
                 return 2;
+            }
 
             signal = signalAsT;
             return 0;
