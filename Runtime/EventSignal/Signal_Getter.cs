@@ -10,6 +10,13 @@ namespace AceLand.EventDriven.EventSignal
 {
     public partial class Signal
     {
+        public static ISignal GetOrCreate(string id)
+        {
+            return Signals.TryGetSignal(id, out Signal s) != 0
+                ? s
+                : Builder().WithId(id).Build();
+        }
+        
         public static bool TryGet(string id, out ISignal signal)
         {
             if (Signals.TryGetSignal(id, out Signal s) != 0)
@@ -57,6 +64,9 @@ namespace AceLand.EventDriven.EventSignal
             trigger = s.AsTrigger();
             return true;
         }
+        
+        public static ISignal GetOrCreate<TEnum>(TEnum id) =>
+            GetOrCreate(id.ToString());
         
         public static bool TryGet<TEnum>(TEnum id, out ISignal signal) where TEnum: Enum =>
             TryGet(id.ToString(), out signal);
