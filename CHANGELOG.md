@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.2.1] - 2025-12-10
+### Added
+- [Signal] GetOrCreate
+- [Signal] warning log on get signal fail with wrong type
+
 ## [2.2.0] - 2025-12-10
 ### Added
 - [Signal] TryGetLinker and GetLinkerAsync for getting ISignalLinker
