@@ -12,7 +12,7 @@ namespace AceLand.EventDriven.EventSignal
     {
         public static ISignal<T> GetOrCreate(string id)
         {
-            return Signals.TryGetSignal(id, out Signal<T> s) != 0
+            return Signals.TryGetSignal(id, out Signal<T> s) == 0
                 ? s
                 : Signal.Builder().WithId(id).WithValue<T>().Build();
         }
