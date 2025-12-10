@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.2.2] - 2025-12-10
+### Fixed
+- [Signal] GetOrCreate don't return correctly
+
 ## [2.2.1] - 2025-12-10
 ### Added
 - [Signal] GetOrCreate
