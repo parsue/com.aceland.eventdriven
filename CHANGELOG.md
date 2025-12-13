@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.0] - 2025-12-13
+### Removed
+- all meta files
+
 ## [2.2.2] - 2025-12-10
 ### Fixed
 - [Signal] GetOrCreate don't return correctly
