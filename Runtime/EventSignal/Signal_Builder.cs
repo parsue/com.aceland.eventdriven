@@ -1,7 +1,7 @@
 ﻿using System;
 using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.Library.Optional;
+using AceLand.Optional;
 using AceLand.PlayerLoopHack;
 
 namespace AceLand.EventDriven.EventSignal

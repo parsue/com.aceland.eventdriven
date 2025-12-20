@@ -1,5 +1,5 @@
 ﻿using System;
-using AceLand.Library.Disposable;
+using AceLand.EventDriven.Core;
 using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal.Core

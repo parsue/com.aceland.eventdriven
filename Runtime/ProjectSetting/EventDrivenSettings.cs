@@ -1,7 +1,7 @@
 using System;
 using AceLand.EventDriven.Profiles;
-using AceLand.Library.ProjectSetting;
 using AceLand.PlayerLoopHack;
+using AceLand.ProjectSetting;
 using UnityEngine;
 
 namespace AceLand.EventDriven.ProjectSetting
