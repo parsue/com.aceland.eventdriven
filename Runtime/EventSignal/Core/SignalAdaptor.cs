@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AceLand.EventDriven.Core;
+using AceLand.Disposable;
 using ZLinq;
 
 namespace AceLand.EventDriven.EventSignal.Core

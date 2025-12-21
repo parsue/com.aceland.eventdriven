@@ -1,6 +1,4 @@
-﻿using AceLand.EventDriven.EventSignal.Core;
-
-namespace AceLand.EventDriven.EventSignal
+﻿namespace AceLand.EventDriven.EventSignal
 {
     public interface IReadonlySignal<T> : ISignalListener<T>
     {
