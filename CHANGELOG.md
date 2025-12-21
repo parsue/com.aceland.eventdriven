@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.3] - 2025-12-20
+### Added
+- Dependency on AceLand.Disposal
+
 ## [2.3.2] - 2025-12-20
 ### Added
 - Dependency on AceLand.Optional
