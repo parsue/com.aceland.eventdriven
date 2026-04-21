@@ -10,7 +10,10 @@ namespace AceLand.EventDriven.Bus.Services
     internal sealed class SignatureService
     {
         public static SignatureService Build() => new();
-        private SignatureService() { }
+        private SignatureService()
+        {
+            _signatures = new();
+        }
 
         private readonly Dictionary<Type, EventSignature> _signatures = new();
 
