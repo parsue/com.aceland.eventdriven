@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.4.0] - 2026-04-21
+### Added
+- [Bus] raise event with constrait data type in compile time
+- [Bus] event with data should be inherited to IEvent<TData>
+- [Bus] error log will be shown on Editor/Dev build if any incorrect event found
+
 ## [2.3.3] - 2025-12-20
 ### Added
 - Dependency on AceLand.Disposal
