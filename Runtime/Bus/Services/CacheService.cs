@@ -9,12 +9,12 @@ namespace AceLand.EventDriven.Bus.Services
         public static CacheService Build() => new();
         private CacheService()
         {
-            _lock = new();
-            _eventCache = new();
+            _lock = new object();
+            _eventCache = new Dictionary<Type, EventCache>();
         }
 
-        private readonly object _lock = new();
-        private readonly Dictionary<Type, EventCache> _eventCache = new();
+        private readonly object _lock;
+        private readonly Dictionary<Type, EventCache> _eventCache;
 
         public void ClearEventCache(Type eventType)
         {

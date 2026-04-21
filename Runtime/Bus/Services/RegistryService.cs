@@ -11,16 +11,16 @@ namespace AceLand.EventDriven.Bus.Services
         public static RegistryService Build(SignatureService signatures, CacheService cache) => new(signatures, cache);
         private RegistryService(SignatureService signatures, CacheService cache)
         {
-            _lock = new();
-            _listeners = new();
-            _instanceDelegates = new();
+            _lock = new object();
+            _listeners = new Dictionary<Type, Delegate>();
+            _instanceDelegates = new Dictionary<Type, Dictionary<object, Delegate>>();
             _signatures = signatures ?? throw new ArgumentNullException(nameof(signatures));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        private readonly object _lock = new();
-        private readonly Dictionary<Type, Delegate> _listeners = new();
-        private readonly Dictionary<Type, Dictionary<object, Delegate>> _instanceDelegates = new();
+        private readonly object _lock;
+        private readonly Dictionary<Type, Delegate> _listeners;
+        private readonly Dictionary<Type, Dictionary<object, Delegate>> _instanceDelegates;
 
         private readonly SignatureService _signatures;
         private readonly CacheService _cache;

@@ -12,10 +12,10 @@ namespace AceLand.EventDriven.Bus.Services
         public static SignatureService Build() => new();
         private SignatureService()
         {
-            _signatures = new();
+            _signatures = new Dictionary<Type, EventSignature>();
         }
 
-        private readonly Dictionary<Type, EventSignature> _signatures = new();
+        private readonly Dictionary<Type, EventSignature> _signatures;
 
         public void InitializeAndScan()
         {

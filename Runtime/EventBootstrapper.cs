@@ -10,6 +10,7 @@ namespace AceLand.EventDriven
         private static void Initialization()
         {
             EventBus.Initialize();
+            
             var settings = EventDrivenUtils.Settings;
             foreach (var provider in settings.PrewarmProviders)
                 provider.PrewarmSignal();

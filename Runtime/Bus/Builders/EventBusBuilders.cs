@@ -89,7 +89,12 @@ namespace AceLand.EventDriven.Bus.Builders
                 _eventInterfaces = _instance.GetType()
                     .GetInterfaces()
                     .AsValueEnumerable()
-                    .Where(i => i != typeof(IBusEvent) && typeof(IBusEvent).IsAssignableFrom(i) && i.IsInterface)
+                    .Where(t => 
+                        t.IsInterface && 
+                        typeof(IBusEvent).IsAssignableFrom(t) && 
+                        t != typeof(IBusEvent) &&
+                        t != typeof(IEvent) && // Ignores the non-generic IEvent
+                        !(t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEvent<>)))
                     .ToArray();
             }
 
@@ -99,9 +104,7 @@ namespace AceLand.EventDriven.Bus.Builders
             public IEventKickStartInstanceBuilder Listen()
             {
                 foreach (var ev in _eventInterfaces)
-                {
                     EventBus.SubscribeInstance(ev, _instance);
-                }
 
                 return new KickStartInstanceBuilder(
                     onDone: () => { },
