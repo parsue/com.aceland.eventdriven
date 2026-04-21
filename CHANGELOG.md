@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.4.2] - 2026-04-21
+### Fixed
+- throw IEvent is not registered issue. Caused by initialization not ignored base interface types.
+
 ## [2.4.1] - 2026-04-21
 ### Fixed
 - prevent Unity Domain keep old cached data
