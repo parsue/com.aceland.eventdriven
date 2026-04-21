@@ -1,48 +1,61 @@
-﻿namespace AceLand.EventDriven.Bus.Builders
+﻿using System;
+
+namespace AceLand.EventDriven.Bus.Builders
 {
     public static class EventRaiserBuilders
     {
-        public interface IEventRaiserPayloadBuilder : IEventRaiserRaiseBuilder
+        // Notice the covariant 'out' keyword here
+        public interface IEventRaiser<out TEvent> where TEvent : IBusEvent
         {
-            IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data);
+            Type EventType { get; }
+            object Sender { get; }
         }
-        
+
         public interface IEventRaiserRaiseBuilder
         {
             void Raise();
         }
 
-        internal class EventBusRaiserBuilder<T> : IEventRaiserPayloadBuilder
-            where T : IEvent
+        // Internal interface to hide the actual raise/withData logic from the public API
+        internal interface IEventRaiserInternal
         {
-            private readonly object _sender;
-            
-            public EventBusRaiserBuilder(object sender)
-            {
-                _sender = sender;
-            }
-
-            public IEventRaiserRaiseBuilder WithData<TPayload>(TPayload data) =>
-                new EventBusRaiserBuilder<T, TPayload>(_sender, data);
-            
-            public void Raise() =>
-                EventBus.RaiseEvent<T>(_sender);
+            void InternalRaise();
+            IEventRaiserRaiseBuilder InternalWithData<TPayload>(TPayload data);
         }
 
-        private class EventBusRaiserBuilder<T, TPayload> : IEventRaiserRaiseBuilder
-            where T : IEvent
+        internal class EventBusRaiser<TEvent> : IEventRaiser<TEvent>, IEventRaiserInternal
+            where TEvent : IBusEvent
         {
+            public Type EventType => typeof(TEvent);
+            public object Sender { get; }
+
+            public EventBusRaiser(object sender)
+            {
+                Sender = sender;
+            }
+
+            public void InternalRaise() =>
+                EventBus.RaiseEvent(typeof(TEvent), Sender);
+
+            public IEventRaiserRaiseBuilder InternalWithData<TPayload>(TPayload data) =>
+                new EventBusRaiserWithData<TPayload>(typeof(TEvent), Sender, data);
+        }
+
+        internal class EventBusRaiserWithData<TPayload> : IEventRaiserRaiseBuilder
+        {
+            private readonly Type _eventType;
             private readonly object _sender;
             private readonly TPayload _payload;
-            
-            public EventBusRaiserBuilder(object sender, TPayload payload)
+
+            public EventBusRaiserWithData(Type eventType, object sender, TPayload payload)
             {
+                _eventType = eventType;
                 _sender = sender;
                 _payload = payload;
             }
-            
+
             public void Raise() =>
-                EventBus.RaiseEvent<T, TPayload>(_sender, _payload);
+                EventBus.RaiseEvent(_eventType, _sender, _payload);
         }
     }
 }

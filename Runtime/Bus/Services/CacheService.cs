@@ -7,8 +7,8 @@ namespace AceLand.EventDriven.Bus.Services
     internal sealed class CacheService
     {
         public static CacheService Build() => new();
-        private CacheService() {}
-        
+        private CacheService() { }
+
         private readonly object _lock = new();
         private readonly Dictionary<Type, EventCache> _eventCache = new();
 

@@ -5,7 +5,7 @@ namespace AceLand.EventDriven.Bus
 {
     public static partial class EventBus
     {
-        public static EventBusBuilders.IEventBusBuilder Event<TEvent>() where TEvent : IEvent
+        public static EventBusBuilders.IEventBusBuilder<TEvent> Event<TEvent>() where TEvent : IBusEvent
         {
             EnsureIsEventInterface(typeof(TEvent));
             return new EventBusBuilders.EventBusBuilder<TEvent>(null);
@@ -18,7 +18,7 @@ namespace AceLand.EventDriven.Bus
                 : new EventBusBuilders.MultiEventBusBuilder(listenerInstance);
         }
 
-        public static EventBusBuilders.IEventBusObjBuilder Event<TEvent>(object listenerInstance) where TEvent : IEvent
+        public static EventBusBuilders.IEventBusObjBuilder Event<TEvent>(object listenerInstance) where TEvent : IBusEvent
         {
             EnsureIsEventInterface(typeof(TEvent));
             return listenerInstance == null
@@ -26,7 +26,7 @@ namespace AceLand.EventDriven.Bus
                 : new EventBusBuilders.EventBusBuilder<TEvent>(listenerInstance);
         }
 
-        public static void ClearCache<TEvent>() where TEvent : IEvent
+        public static void ClearCache<TEvent>() where TEvent : IBusEvent
         {
             Cache.ClearEventCache(typeof(TEvent));
         }
@@ -35,7 +35,5 @@ namespace AceLand.EventDriven.Bus
         {
             Cache.ClearAllEventCache();
         }
-
-        // Internal helpers used by builders and API
     }
 }

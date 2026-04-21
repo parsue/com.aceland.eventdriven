@@ -10,10 +10,11 @@ namespace AceLand.EventDriven.Bus.Builders
             IEventKickStartInstanceBuilder Listen();
             void Unlisten();
         }
-        
-        public interface IEventBusBuilder
+
+        // NOTE: Covariant out TEvent enables implicit casting to base interfaces
+        public interface IEventBusBuilder<out TEvent> where TEvent : IBusEvent
         {
-            EventRaiserBuilders.IEventRaiserPayloadBuilder WithSender(object sender);
+            EventRaiserBuilders.IEventRaiser<TEvent> WithSender(object sender);
         }
 
         public interface IEventKickStartInstanceBuilder
@@ -22,8 +23,8 @@ namespace AceLand.EventDriven.Bus.Builders
             void Done();
         }
 
-        internal class EventBusBuilder<TEvent> : IEventBusBuilder, IEventBusObjBuilder
-            where TEvent : IEvent
+        internal class EventBusBuilder<TEvent> : IEventBusBuilder<TEvent>, IEventBusObjBuilder
+            where TEvent : IBusEvent
         {
             private readonly object _instanceOrNull;
 
@@ -32,8 +33,8 @@ namespace AceLand.EventDriven.Bus.Builders
                 _instanceOrNull = instanceOrNull;
             }
 
-            public EventRaiserBuilders.IEventRaiserPayloadBuilder WithSender(object sender) =>
-                new EventRaiserBuilders.EventBusRaiserBuilder<TEvent>(sender);
+            public EventRaiserBuilders.IEventRaiser<TEvent> WithSender(object sender) =>
+                new EventRaiserBuilders.EventBusRaiser<TEvent>(sender);
 
             public IEventKickStartInstanceBuilder Listen()
             {
@@ -77,7 +78,7 @@ namespace AceLand.EventDriven.Bus.Builders
             }
         }
 
-        internal class MultiEventBusBuilder : IEventBusBuilder, IEventBusObjBuilder
+        internal class MultiEventBusBuilder : IEventBusBuilder<IBusEvent>, IEventBusObjBuilder
         {
             private readonly object _instance;
             private readonly Type[] _eventInterfaces;
@@ -88,18 +89,12 @@ namespace AceLand.EventDriven.Bus.Builders
                 _eventInterfaces = _instance.GetType()
                     .GetInterfaces()
                     .AsValueEnumerable()
-                    .Where(i => i != typeof(IEvent) && typeof(IEvent).IsAssignableFrom(i) && i.IsInterface)
+                    .Where(i => i != typeof(IBusEvent) && typeof(IBusEvent).IsAssignableFrom(i) && i.IsInterface)
                     .ToArray();
             }
 
-            public EventRaiserBuilders.IEventRaiserPayloadBuilder WithSender(object sender) =>
+            public EventRaiserBuilders.IEventRaiser<IBusEvent> WithSender(object sender) =>
                 throw new InvalidOperationException("WithSender is not valid for Event(instance). Use Event<TEvent>().WithSender.");
-
-            public EventListenerBuilders.IEventKickStartBuilder WithListener(Action<object> listener) =>
-                throw new InvalidOperationException("WithListener(Action) is not valid for Event(instance). Use Event<TEvent>(instance) or Event<TEvent>().WithListener.");
-
-            public EventListenerBuilders.IEventKickStartBuilder WithListener<TPayload>(Action<object, TPayload> listener) =>
-                throw new InvalidOperationException("WithListener(Action<object,TPayload>) is not valid for Event(instance). Use Event<TEvent>(instance).");
 
             public IEventKickStartInstanceBuilder Listen()
             {
@@ -121,12 +116,6 @@ namespace AceLand.EventDriven.Bus.Builders
             {
                 EventBus.UnsubscribeAllForInstance(_instance);
             }
-
-            public void Unlisten(Action<object> listener) =>
-                throw new InvalidOperationException("Unlisten(Action) is not valid for Event(instance).");
-
-            public void Unlisten<TPayload>(Action<object, TPayload> listener) =>
-                throw new InvalidOperationException("Unlisten(Action<object,TPayload>) is not valid for Event(instance).");
 
             private sealed class KickStartInstanceBuilder : IEventKickStartInstanceBuilder
             {

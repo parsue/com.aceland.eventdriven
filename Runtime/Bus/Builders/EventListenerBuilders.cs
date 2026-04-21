@@ -15,7 +15,7 @@ namespace AceLand.EventDriven.Bus.Builders
         }
 
         internal class EventBusListener<TEvent> : IEventKickStartBuilder
-            where TEvent : IEvent
+            where TEvent : IBusEvent
         {
             private readonly Action<object> _listener;
 
@@ -35,7 +35,7 @@ namespace AceLand.EventDriven.Bus.Builders
         }
 
         internal class EventBusListener<TEvent, TPayload> : IEventKickStartBuilder
-            where TEvent : IEvent
+            where TEvent : IBusEvent
         {
             private readonly Action<object, TPayload> _listener;
 

@@ -14,7 +14,7 @@ namespace AceLand.EventDriven.Bus.Services
             _signatures = signatures ?? throw new ArgumentNullException(nameof(signatures));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
-        
+
         private readonly object _lock = new();
         private readonly Dictionary<Type, Delegate> _listeners = new();
         private readonly Dictionary<Type, Dictionary<object, Delegate>> _instanceDelegates = new();
