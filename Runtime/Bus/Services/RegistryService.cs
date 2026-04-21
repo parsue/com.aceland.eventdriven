@@ -11,6 +11,9 @@ namespace AceLand.EventDriven.Bus.Services
         public static RegistryService Build(SignatureService signatures, CacheService cache) => new(signatures, cache);
         private RegistryService(SignatureService signatures, CacheService cache)
         {
+            _lock = new();
+            _listeners = new();
+            _instanceDelegates = new();
             _signatures = signatures ?? throw new ArgumentNullException(nameof(signatures));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
