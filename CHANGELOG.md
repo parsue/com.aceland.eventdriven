@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.4.1] - 2026-04-21
+### Fixed
+- prevent Unity Domain keep old cached data
+
 ## [2.4.0] - 2026-04-21
 ### Added
 - [Bus] raise event with constrait data type in compile time
