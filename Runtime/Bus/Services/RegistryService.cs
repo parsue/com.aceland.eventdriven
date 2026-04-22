@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using AceLand.EventDriven.Bus.Core;
+using UnityEngine;
 using ZLinq;
 
 namespace AceLand.EventDriven.Bus.Services
@@ -9,6 +10,7 @@ namespace AceLand.EventDriven.Bus.Services
     internal sealed class RegistryService
     {
         public static RegistryService Build(SignatureService signatures, CacheService cache) => new(signatures, cache);
+
         private RegistryService(SignatureService signatures, CacheService cache)
         {
             _lock = new object();
@@ -32,6 +34,7 @@ namespace AceLand.EventDriven.Bus.Services
                 _listeners.Clear();
                 _instanceDelegates.Clear();
             }
+
             _cache.InternalClearAll();
         }
 
@@ -45,18 +48,26 @@ namespace AceLand.EventDriven.Bus.Services
 
             lock (_lock)
             {
-                if (_listeners.TryGetValue(eventType, out var existing))
-                    _listeners[eventType] = Delegate.Combine(existing, del);
-                else
-                    _listeners[eventType] = del;
-
                 if (!_instanceDelegates.TryGetValue(eventType, out var map))
                 {
                     map = new Dictionary<object, Delegate>(ReferenceEqualityComparer.Instance);
                     _instanceDelegates[eventType] = map;
                 }
 
+                if (map.ContainsKey(instance))
+                {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    Debug.LogWarning($"[EventBus] Instance of type {instance.GetType().Name} is already subscribed to {eventType.Name}. Ignoring duplicate subscription.");
+#endif
+                    return; // Prevent duplicate subscription
+                }
+
                 map[instance] = Delegate.Combine(map.GetValueOrDefault(instance), del);
+
+                if (_listeners.TryGetValue(eventType, out var existing))
+                    _listeners[eventType] = Delegate.Combine(existing, del);
+                else
+                    _listeners[eventType] = del;
             }
         }
 
@@ -110,7 +121,7 @@ namespace AceLand.EventDriven.Bus.Services
             }
         }
 
-        public void SubscribeDelegate(Type eventType, Action<object> listener)
+        public void SubscribeDelegate(Type eventType, Action listener)
         {
             EventBus.EnsureIsEventInterface(eventType);
             if (listener == null) throw new ArgumentNullException(nameof(listener));
@@ -118,13 +129,25 @@ namespace AceLand.EventDriven.Bus.Services
             lock (_lock)
             {
                 if (_listeners.TryGetValue(eventType, out var existing))
+                {
+                    if (existing != null && existing.GetInvocationList().AsValueEnumerable().Contains(listener))
+                    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogWarning($"[EventBus] Delegate is already subscribed to {eventType.Name}. Ignoring duplicate subscription.");
+#endif
+                        return; // Prevent duplicate subscription
+                    }
+                    
                     _listeners[eventType] = Delegate.Combine(existing, listener);
+                }
                 else
+                {
                     _listeners[eventType] = listener;
+                }
             }
         }
 
-        public void SubscribeDelegate<TPayload>(Type eventType, Action<object, TPayload> listener)
+        public void SubscribeDelegate<TPayload>(Type eventType, Action<TPayload> listener)
         {
             EventBus.EnsureIsEventInterface(eventType);
             if (listener == null) throw new ArgumentNullException(nameof(listener));
@@ -132,9 +155,21 @@ namespace AceLand.EventDriven.Bus.Services
             lock (_lock)
             {
                 if (_listeners.TryGetValue(eventType, out var existing))
+                {
+                    if (existing != null && existing.GetInvocationList().AsValueEnumerable().Contains(listener))
+                    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogWarning($"[EventBus] Delegate is already subscribed to {eventType.Name}. Ignoring duplicate subscription.");
+#endif
+                        return; // Prevent duplicate subscription
+                    }
+                    
                     _listeners[eventType] = Delegate.Combine(existing, listener);
+                }
                 else
+                {
                     _listeners[eventType] = listener;
+                }
             }
         }
 
@@ -148,47 +183,43 @@ namespace AceLand.EventDriven.Bus.Services
             SendCacheToDelegate(sig, del);
         }
 
-        public void SendCacheToDelegate(Type eventType, Action<object> listener)
+        public void SendCacheToDelegate(Type eventType, Action listener)
         {
-            _cache.WithCache(eventType, cache =>
-            {
-                (listener)?.Invoke(cache.Sender);
-            });
+            _cache.WithCache(eventType, _ => { listener?.Invoke(); });
         }
 
-        public void SendCacheToDelegate<TPayload>(Type eventType, Action<object, TPayload> listener)
+        public void SendCacheToDelegate<TPayload>(Type eventType, Action<TPayload> listener)
         {
-            _cache.WithCache(eventType, cache =>
-            {
-                listener?.Invoke(cache.Sender, (TPayload)cache.EventData);
-            });
+            _cache.WithCache(eventType, cache => { listener?.Invoke((TPayload)cache.EventData); });
         }
 
-        public void RaiseEvent(Type eventType, object sender)
+        public void RaiseEvent(Type eventType)
         {
             EventBus.EnsureIsEventInterface(eventType);
-            _cache.SetCache(eventType, new EventCache(sender, null));
+            _cache.SetCache(eventType, new EventCache(null));
             Delegate del;
             lock (_lock)
             {
                 _listeners.TryGetValue(eventType, out del);
             }
-            (del as Action<object>)?.Invoke(sender);
+
+            (del as Action)?.Invoke();
         }
 
-        public void RaiseEvent<TPayload>(Type eventType, object sender, TPayload payload)
+        public void RaiseEvent<TPayload>(Type eventType, TPayload payload)
         {
             EventBus.EnsureIsEventInterface(eventType);
-            _cache.SetCache(eventType, new EventCache(sender, payload));
+            _cache.SetCache(eventType, new EventCache(payload));
             Delegate del;
             lock (_lock)
             {
                 _listeners.TryGetValue(eventType, out del);
             }
-            (del as Action<object, TPayload>)?.Invoke(sender, payload);
+
+            (del as Action<TPayload>)?.Invoke(payload);
         }
 
-        private Delegate BindInstanceDelegate(EventSignature sig, object instance)
+        private static Delegate BindInstanceDelegate(EventSignature sig, object instance)
         {
             if (!sig.EventInterfaceType.IsAssignableFrom(instance.GetType()))
                 throw new InvalidOperationException(
@@ -197,19 +228,11 @@ namespace AceLand.EventDriven.Bus.Services
             var targetMethod = ResolveImplementationMethod(instance.GetType(), sig.EventInterfaceType, sig.Method);
 
             if (sig.Kind == EventSignatureKind.NoPayload)
-            {
-                return (Action<object>)((sender) => targetMethod.Invoke(instance, new[] { sender }));
-            }
-            else
-            {
-                var helper = typeof(RegistryService).GetMethod(nameof(CreateTwoParamAction),
-                    BindingFlags.NonPublic | BindingFlags.Static);
-                if (helper == null)
-                    throw new InvalidOperationException(
-                        $"{instance.GetType().Name} does not implement {sig.EventInterfaceType.Name}.");
-                var closed = helper.MakeGenericMethod(sig.PayloadTypeOrNull);
-                return (Delegate)closed.Invoke(null, new[] { instance, targetMethod });
-            }
+                return Delegate.CreateDelegate(typeof(Action), instance, targetMethod);
+            
+            var delegateType = typeof(Action<>).MakeGenericType(sig.PayloadTypeOrNull);
+            
+            return Delegate.CreateDelegate(delegateType, instance, targetMethod);
         }
 
         private static MethodInfo ResolveImplementationMethod(Type concreteType, Type interfaceType,
@@ -222,51 +245,19 @@ namespace AceLand.EventDriven.Bus.Services
                     return map.TargetMethods[i];
             }
 
-            var name = interfaceMethod.Name;
-            var pars = interfaceMethod.GetParameters().AsValueEnumerable().Select(p => p.ParameterType).ToArray();
-            var impl = concreteType.GetMethod(name,
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, pars, null);
-            return impl == null
-                ? throw new MissingMethodException(
-                    $"Cannot find implementation for {interfaceType.Name}.{name} on {concreteType.Name}.")
-                : impl;
-        }
-
-        private static Delegate CreateTwoParamAction<TPayload>(object instance, MethodInfo target)
-        {
-            return (Action<object, TPayload>)Action;
-            void Action(object sender, TPayload payload) => target.Invoke(instance, new[] { sender, payload });
+            throw new MissingMethodException(
+                $"Cannot find implementation for {interfaceType.Name}.{interfaceMethod.Name} on {concreteType.Name}.");
         }
 
         private void SendCacheToDelegate(EventSignature sig, Delegate del)
         {
             _cache.WithCache(sig.EventInterfaceType, cache =>
             {
-                switch (sig.Kind)
-                {
-                    case EventSignatureKind.NoPayload:
-                        (del as Action<object>)?.Invoke(cache.Sender);
-                        break;
-                    case EventSignatureKind.SinglePayload:
-                        InvokeWithObjectPayload(sig.PayloadTypeOrNull, del, cache.Sender, cache.EventData);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                if (sig.Kind == EventSignatureKind.NoPayload)
+                    (del as Action)?.Invoke();
+                else
+                    del.DynamicInvoke(cache.EventData);
             });
-        }
-
-        private static void InvokeWithObjectPayload(Type payloadType, Delegate del, object sender, object payload)
-        {
-            var mi = typeof(RegistryService).GetMethod(nameof(InvokeGenericPayload),
-                BindingFlags.NonPublic | BindingFlags.Static);
-            var gmi = mi!.MakeGenericMethod(payloadType);
-            gmi.Invoke(null, new[] { del, sender, payload });
-        }
-
-        private static void InvokeGenericPayload<TPayload>(Delegate del, object sender, object payload)
-        {
-            (del as Action<object, TPayload>)?.Invoke(sender, (TPayload)payload);
         }
     }
 }

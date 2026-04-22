@@ -17,9 +17,9 @@ namespace AceLand.EventDriven.Bus.Builders
         internal class EventBusListener<TEvent> : IEventKickStartBuilder
             where TEvent : IBusEvent
         {
-            private readonly Action<object> _listener;
+            private readonly Action _listener;
 
-            public EventBusListener(Action<object> listener) =>
+            public EventBusListener(Action listener) =>
                 _listener = listener ?? throw new ArgumentNullException(nameof(listener));
 
             public IEventKickStartBuilder Listen()
@@ -37,9 +37,9 @@ namespace AceLand.EventDriven.Bus.Builders
         internal class EventBusListener<TEvent, TPayload> : IEventKickStartBuilder
             where TEvent : IBusEvent
         {
-            private readonly Action<object, TPayload> _listener;
+            private readonly Action<TPayload> _listener;
 
-            public EventBusListener(Action<object, TPayload> listener) =>
+            public EventBusListener(Action<TPayload> listener) =>
                 _listener = listener ?? throw new ArgumentNullException(nameof(listener));
 
             public IEventKickStartBuilder Listen()

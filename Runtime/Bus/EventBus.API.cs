@@ -5,10 +5,10 @@ namespace AceLand.EventDriven.Bus
 {
     public static partial class EventBus
     {
-        public static EventBusBuilders.IEventBusBuilder<TEvent> Event<TEvent>() where TEvent : IBusEvent
+        public static EventRaiserBuilders.IEventRaiser<TEvent> Event<TEvent>() where TEvent : IBusEvent
         {
             EnsureIsEventInterface(typeof(TEvent));
-            return new EventBusBuilders.EventBusBuilder<TEvent>(null);
+            return new EventRaiserBuilders.EventBusRaiser<TEvent>();
         }
 
         public static EventBusBuilders.IEventBusObjBuilder Event(object listenerInstance)

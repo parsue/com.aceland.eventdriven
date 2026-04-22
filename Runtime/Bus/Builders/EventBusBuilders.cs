@@ -11,74 +11,63 @@ namespace AceLand.EventDriven.Bus.Builders
             void Unlisten();
         }
 
-        // NOTE: Covariant out TEvent enables implicit casting to base interfaces
-        public interface IEventBusBuilder<out TEvent> where TEvent : IBusEvent
-        {
-            EventRaiserBuilders.IEventRaiser<TEvent> WithSender(object sender);
-        }
-
         public interface IEventKickStartInstanceBuilder
         {
             IEventKickStartInstanceBuilder KickStart();
             void Done();
         }
 
-        internal class EventBusBuilder<TEvent> : IEventBusBuilder<TEvent>, IEventBusObjBuilder
-            where TEvent : IBusEvent
+        internal sealed class KickStartInstanceBuilder : IEventKickStartInstanceBuilder
         {
-            private readonly object _instanceOrNull;
+            private readonly Action _onKickStart;
 
-            public EventBusBuilder(object instanceOrNull)
+            public KickStartInstanceBuilder(Action onKickStart)
             {
-                _instanceOrNull = instanceOrNull;
+                _onKickStart = onKickStart ?? (() => { });
             }
 
-            public EventRaiserBuilders.IEventRaiser<TEvent> WithSender(object sender) =>
-                new EventRaiserBuilders.EventBusRaiser<TEvent>(sender);
+            public IEventKickStartInstanceBuilder KickStart()
+            {
+                _onKickStart();
+                return this;
+            }
+
+            public void Done()
+            {
+            }
+        }
+
+        internal class EventBusBuilder<TEvent> : IEventBusObjBuilder
+            where TEvent : IBusEvent
+        {
+            private readonly object _instance;
+
+            public EventBusBuilder(object instance)
+            {
+                _instance = instance;
+            }
 
             public IEventKickStartInstanceBuilder Listen()
             {
-                if (_instanceOrNull == null)
+                if (_instance == null)
                     throw new InvalidOperationException("Listen() requires an instance. Use Event<TEvent>(instance).");
 
-                EventBus.SubscribeInstance(typeof(TEvent), _instanceOrNull);
+                EventBus.SubscribeInstance(typeof(TEvent), _instance);
 
-                return new KickStartInstanceBuilder(
-                    onDone: () => { },
-                    onKickStart: () => EventBus.KickStartInstance(typeof(TEvent), _instanceOrNull)
-                );
+                return new KickStartInstanceBuilder(() => EventBus.KickStartInstance(typeof(TEvent), _instance));
             }
 
             public void Unlisten()
             {
-                if (_instanceOrNull == null)
-                    throw new InvalidOperationException("Unlisten() requires an instance. Use Event<TEvent>(instance).");
+                if (_instance == null)
+                    throw new InvalidOperationException(
+                        "Unlisten() requires an instance. Use Event<TEvent>(instance).");
 
-                EventBus.UnsubscribeInstance(typeof(TEvent), _instanceOrNull);
-            }
-
-            private sealed class KickStartInstanceBuilder : IEventKickStartInstanceBuilder
-            {
-                private readonly Action _onDone;
-                private readonly Action _onKickStart;
-
-                public KickStartInstanceBuilder(Action onDone, Action onKickStart)
-                {
-                    _onDone = onDone ?? (() => { });
-                    _onKickStart = onKickStart ?? (() => { });
-                }
-
-                public IEventKickStartInstanceBuilder KickStart()
-                {
-                    _onKickStart();
-                    return this;
-                }
-
-                public void Done() => _onDone();
+                EventBus.UnsubscribeInstance(typeof(TEvent), _instance);
             }
         }
 
-        internal class MultiEventBusBuilder : IEventBusBuilder<IBusEvent>, IEventBusObjBuilder
+        internal class MultiEventBusBuilder : IEventBusObjBuilder
         {
             private readonly object _instance;
             private readonly Type[] _eventInterfaces;
@@ -89,55 +78,30 @@ namespace AceLand.EventDriven.Bus.Builders
                 _eventInterfaces = _instance.GetType()
                     .GetInterfaces()
                     .AsValueEnumerable()
-                    .Where(t => 
-                        t.IsInterface && 
-                        typeof(IBusEvent).IsAssignableFrom(t) && 
+                    .Where(t =>
+                        t.IsInterface &&
+                        typeof(IBusEvent).IsAssignableFrom(t) &&
                         t != typeof(IBusEvent) &&
-                        t != typeof(IEvent) && // Ignores the non-generic IEvent
+                        t != typeof(IEvent) &&
                         !(t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEvent<>)))
                     .ToArray();
             }
-
-            public EventRaiserBuilders.IEventRaiser<IBusEvent> WithSender(object sender) =>
-                throw new InvalidOperationException("WithSender is not valid for Event(instance). Use Event<TEvent>().WithSender.");
 
             public IEventKickStartInstanceBuilder Listen()
             {
                 foreach (var ev in _eventInterfaces)
                     EventBus.SubscribeInstance(ev, _instance);
 
-                return new KickStartInstanceBuilder(
-                    onDone: () => { },
-                    onKickStart: () =>
-                    {
-                        foreach (var ev in _eventInterfaces)
-                            EventBus.KickStartInstance(ev, _instance);
-                    });
+                return new KickStartInstanceBuilder(() =>
+                {
+                    foreach (var ev in _eventInterfaces)
+                        EventBus.KickStartInstance(ev, _instance);
+                });
             }
 
             public void Unlisten()
             {
                 EventBus.UnsubscribeAllForInstance(_instance);
-            }
-
-            private sealed class KickStartInstanceBuilder : IEventKickStartInstanceBuilder
-            {
-                private readonly Action _onDone;
-                private readonly Action _onKickStart;
-
-                public KickStartInstanceBuilder(Action onDone, Action onKickStart)
-                {
-                    _onDone = onDone ?? (() => { });
-                    _onKickStart = onKickStart ?? (() => { });
-                }
-
-                public IEventKickStartInstanceBuilder KickStart()
-                {
-                    _onKickStart();
-                    return this;
-                }
-
-                public void Done() => _onDone();
             }
         }
     }

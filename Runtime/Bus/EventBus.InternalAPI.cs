@@ -25,13 +25,13 @@ namespace AceLand.EventDriven.Bus
             Registry.UnsubscribeAllForInstance(instance);
         }
 
-        internal static void SubscribeDelegate<TEvent>(Action<object> listener)
+        internal static void SubscribeDelegate<TEvent>(Action listener)
             where TEvent : IBusEvent
         {
             Registry.SubscribeDelegate(typeof(TEvent), listener);
         }
 
-        internal static void SubscribeDelegate<TEvent, TPayload>(Action<object, TPayload> listener)
+        internal static void SubscribeDelegate<TEvent, TPayload>(Action<TPayload> listener)
             where TEvent : IBusEvent
         {
             Registry.SubscribeDelegate(typeof(TEvent), listener);
@@ -42,25 +42,25 @@ namespace AceLand.EventDriven.Bus
             Registry.KickStartInstance(eventType, instance);
         }
 
-        internal static void SendEventCache<TEvent>(Action<object> listener) where TEvent : IBusEvent
+        internal static void SendEventCache<TEvent>(Action listener) where TEvent : IBusEvent
         {
             Registry.SendCacheToDelegate(typeof(TEvent), listener);
         }
 
-        internal static void SendEventCache<TEvent, TPayload>(Action<object, TPayload> listener)
+        internal static void SendEventCache<TEvent, TPayload>(Action<TPayload> listener)
             where TEvent : IBusEvent
         {
             Registry.SendCacheToDelegate(typeof(TEvent), listener);
         }
 
-        internal static void RaiseEvent(Type eventType, object sender)
+        internal static void RaiseEvent(Type eventType)
         {
-            Registry.RaiseEvent(eventType, sender);
+            Registry.RaiseEvent(eventType);
         }
 
-        internal static void RaiseEvent<TPayload>(Type eventType, object sender, TPayload payload)
+        internal static void RaiseEvent<TPayload>(Type eventType, TPayload payload)
         {
-            Registry.RaiseEvent(eventType, sender, payload);
+            Registry.RaiseEvent(eventType, payload);
         }
     }
 }
