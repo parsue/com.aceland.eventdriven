@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.5.0] - 2026-04-22
+### Modified
+- [Bus] optimization on invoke listener delegate.
+- [Bus] remove Sender object. Unnecessary in game development.
+- [Bus] ignore duplicated event listener register. Warning log will be show on Editor/Dev Build.
+
 ## [2.4.2] - 2026-04-21
 ### Fixed
 - throw IEvent is not registered issue. Caused by initialization not ignored base interface types.
@@ -12,7 +18,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - prevent Unity Domain keep old cached data
 
-## [2.4.0] - 2026-04-21
+## [2.4.0] - 202[AceLand.EventDriven.asmdef](Runtime/AceLand.EventDriven.asmdef)6-04-21
 ### Added
 - [Bus] raise event with constrait data type in compile time
 - [Bus] event with data should be inherited to IEvent<TData>
