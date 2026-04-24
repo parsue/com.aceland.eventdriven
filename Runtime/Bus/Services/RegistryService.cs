@@ -193,10 +193,11 @@ namespace AceLand.EventDriven.Bus.Services
             _cache.WithCache(eventType, cache => { listener?.Invoke((TPayload)cache.EventData); });
         }
 
-        public void RaiseEvent(Type eventType)
+        public void RaiseEvent(Type eventType, bool setCache)
         {
             EventBus.EnsureIsEventInterface(eventType);
-            _cache.SetCache(eventType, new EventCache(null));
+            if (setCache)
+                _cache.SetCache(eventType, new EventCache(null));
             Delegate del;
             lock (_lock)
             {
@@ -206,10 +207,11 @@ namespace AceLand.EventDriven.Bus.Services
             (del as Action)?.Invoke();
         }
 
-        public void RaiseEvent<TPayload>(Type eventType, TPayload payload)
+        public void RaiseEvent<TPayload>(Type eventType, TPayload payload, bool setCache)
         {
             EventBus.EnsureIsEventInterface(eventType);
-            _cache.SetCache(eventType, new EventCache(payload));
+            if (setCache)
+                _cache.SetCache(eventType, new EventCache(payload));
             Delegate del;
             lock (_lock)
             {

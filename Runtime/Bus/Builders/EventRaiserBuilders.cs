@@ -12,12 +12,13 @@ namespace AceLand.EventDriven.Bus.Builders
         public interface IEventRaiserRaiseBuilder
         {
             void Raise();
+            void RaiseWithoutCache();
         }
 
         internal interface IEventRaiserInternal
         {
-            void InternalRaise();
-            IEventRaiserRaiseBuilder InternalWithData<TPayload>(TPayload data);
+            void InternalRaise(bool setCache);
+            IEventRaiserRaiseBuilder InternalRaiseWithData<TPayload>(TPayload data);
         }
 
         internal class EventBusRaiser<TEvent> : IEventRaiser<TEvent>, IEventRaiserInternal
@@ -25,10 +26,10 @@ namespace AceLand.EventDriven.Bus.Builders
         {
             public Type EventType => typeof(TEvent);
 
-            public void InternalRaise() =>
-                EventBus.RaiseEvent(typeof(TEvent));
+            public void InternalRaise(bool setCache) =>
+                EventBus.RaiseEvent(typeof(TEvent), setCache);
 
-            public IEventRaiserRaiseBuilder InternalWithData<TPayload>(TPayload data) =>
+            public IEventRaiserRaiseBuilder InternalRaiseWithData<TPayload>(TPayload data) =>
                 new EventBusRaiserWithData<TPayload>(typeof(TEvent), data);
         }
 
@@ -44,7 +45,10 @@ namespace AceLand.EventDriven.Bus.Builders
             }
 
             public void Raise() =>
-                EventBus.RaiseEvent(_eventType, _payload);
+                EventBus.RaiseEvent(_eventType, _payload, true);
+
+            public void RaiseWithoutCache() =>
+                EventBus.RaiseEvent(_eventType, _payload, false);
         }
     }
 }

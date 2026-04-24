@@ -53,14 +53,14 @@ namespace AceLand.EventDriven.Bus
             Registry.SendCacheToDelegate(typeof(TEvent), listener);
         }
 
-        internal static void RaiseEvent(Type eventType)
+        internal static void RaiseEvent(Type eventType, bool setCache)
         {
-            Registry.RaiseEvent(eventType);
+            Registry.RaiseEvent(eventType, setCache);
         }
 
-        internal static void RaiseEvent<TPayload>(Type eventType, TPayload payload)
+        internal static void RaiseEvent<TPayload>(Type eventType, TPayload payload, bool setCache)
         {
-            Registry.RaiseEvent(eventType, payload);
+            Registry.RaiseEvent(eventType, payload, setCache);
         }
     }
 }
