@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.5.1] - 2026-04-24
+### Added
+- [Bus] added RaiseWithoutCache()
+
 ## [2.5.0] - 2026-04-22
 ### Modified
 - [Bus] optimization on invoke listener delegate.
