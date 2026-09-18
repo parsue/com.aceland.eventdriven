@@ -1,9 +1,8 @@
 using System;
-using AceLand.Disposable;
 
 namespace AceLand.EventDriven.EventSignal.Core
 {
-    internal class Observers : DisposableObject, IObservers
+    internal class Observers : IDisposable, IObservers
     {
         internal Observers(params Action[] listeners)
         {
@@ -11,9 +10,9 @@ namespace AceLand.EventDriven.EventSignal.Core
                 Listeners += listener;
         }
         
-        ~Observers() => Dispose(false);
+        ~Observers() => Dispose();
 
-        protected override void DisposeUnmanagedResources()
+        public virtual void Dispose()
         {
             Listeners = null;
         }
@@ -30,7 +29,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         }
     }
     
-    internal class Observers<T> : DisposableObject, IObservers<T>
+    internal class Observers<T> : IDisposable, IObservers<T>
     {
         internal Observers(params Action<T>[] listeners)
         {
@@ -38,9 +37,9 @@ namespace AceLand.EventDriven.EventSignal.Core
                 Listeners += listener;
         }
         
-        ~Observers() => Dispose(false);
+        ~Observers() => Dispose();
 
-        protected override void DisposeUnmanagedResources()
+        public virtual void Dispose()
         {
             Listeners = null;
         }

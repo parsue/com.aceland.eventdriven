@@ -1,7 +1,6 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.PlayerLoopHack;
-using AceLand.TaskUtils;
+using AceLand.Lifecycle;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -11,7 +10,7 @@ namespace AceLand.EventDriven.EventSignal
         private readonly Observers _observers;
         private ISignal _refSignal;
         private readonly SignalTriggerMethod _triggerMethod;
-        private readonly PlayerLoopState _triggerState;
+        private readonly PlayerLoopPoint _triggerState;
         private bool _triggeredInThisFrame;
 
         public void AddListener(Action listener, bool runImmediately = false)
@@ -43,7 +42,7 @@ namespace AceLand.EventDriven.EventSignal
                 case SignalTriggerMethod.OncePerFrame:
                     if (_triggeredInThisFrame) return;
                     _triggeredInThisFrame = true;
-                    Promise.Dispatcher.Run(SystemTrigger, _triggerState);
+                    LifecycleFrame.RunNextFrame(SystemTrigger, _triggerState);
                     return;
 
                 default:

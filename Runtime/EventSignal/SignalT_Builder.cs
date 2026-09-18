@@ -1,7 +1,7 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal.Core;
+using AceLand.Lifecycle;
 using AceLand.Optional;
-using AceLand.PlayerLoopHack;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -14,7 +14,7 @@ namespace AceLand.EventDriven.EventSignal
 
         internal class SignalBuilder<TValue> : ISignalFinalBuilder<TValue>
         {
-            internal SignalBuilder(Option<string> id, TValue value, SignalTriggerMethod triggerMethod, PlayerLoopState triggerState)
+            internal SignalBuilder(Option<string> id, TValue value, SignalTriggerMethod triggerMethod, PlayerLoopPoint triggerState)
             {
                 _id = id;
                 _value = value;
@@ -25,7 +25,7 @@ namespace AceLand.EventDriven.EventSignal
             private Option<string> _id;
             private readonly TValue _value;
             private readonly SignalTriggerMethod _triggerMethod;
-            private readonly PlayerLoopState _triggerState;
+            private readonly PlayerLoopPoint _triggerState;
 
             public ISignal<TValue> Build() =>
                 BuildSignal();

@@ -1,13 +1,12 @@
 ﻿using System;
-using AceLand.Disposable;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.PlayerLoopHack;
+using AceLand.Lifecycle;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public partial class Signal<T> : DisposableObject
+    public partial class Signal<T> : IDisposable
     {
-        private Signal(string id, Observers<T> observers, T value, SignalTriggerMethod triggerMethod, PlayerLoopState triggerState)
+        private Signal(string id, Observers<T> observers, T value, SignalTriggerMethod triggerMethod, PlayerLoopPoint triggerState)
         {
             Id = id;
             _observers = observers;
@@ -16,13 +15,18 @@ namespace AceLand.EventDriven.EventSignal
             _triggerState = triggerState;
         }
 
-        ~Signal() => Dispose(false);
+        ~Signal() => Dispose();
         
-        protected override void DisposeManagedResources()
+        public bool Disposed { get; private set; }
+        
+        public virtual void Dispose()
         {
+            if (Disposed) return;
+            
             Signals.UnRegistrySignal(this);
             _observers.Dispose();
             GC.SuppressFinalize(this);
+            Disposed = true;
         }
     }
 }

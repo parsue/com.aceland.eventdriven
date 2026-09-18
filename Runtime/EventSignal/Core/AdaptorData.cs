@@ -1,5 +1,4 @@
 ﻿using System;
-using AceLand.Disposable;
 using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal.Core
@@ -11,7 +10,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         bool Result();
     }
 
-    internal class AdaptorData<T> : DisposableObject, IAdaptorData
+    internal class AdaptorData<T> : IDisposable, IAdaptorData
     {
         internal static AdaptorData<T> Create(ISignalListener<T> signalListener, Predicate<T> result) =>
             new(signalListener, result);
@@ -24,12 +23,11 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         ~AdaptorData()
         {
-            Dispose(false);
+            Dispose();
         }
 
-        protected override void DisposeManagedResources()
+        public virtual void Dispose()
         {
-            base.DisposeManagedResources();
             Listener?.RemoveListener(trigger);
         }
 

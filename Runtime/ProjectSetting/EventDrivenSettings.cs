@@ -1,6 +1,6 @@
 using System;
 using AceLand.EventDriven.Profiles;
-using AceLand.PlayerLoopHack;
+using AceLand.Lifecycle;
 using AceLand.ProjectSetting;
 using UnityEngine;
 
@@ -10,11 +10,11 @@ namespace AceLand.EventDriven.ProjectSetting
     {
         [Header("Signal")] 
         [SerializeField, Min(0.1f)] private float signalGetterTimeout = 1.5f;
-        [SerializeField] private PlayerLoopState signalTriggerState = PlayerLoopState.EarlyUpdate;
+        [SerializeField] private PlayerLoopPoint signalTriggerState = PlayerLoopPoint.EarlyUpdate;
         [SerializeField] private SignalProviderBase[] prewarmProviders = Array.Empty<SignalProviderBase>();
 
         internal float SignalGetterTimeout => signalGetterTimeout;
-        internal PlayerLoopState SignalTriggerState => signalTriggerState;
+        internal PlayerLoopPoint SignalTriggerState => signalTriggerState;
         internal ReadOnlySpan<SignalProviderBase> PrewarmProviders => prewarmProviders;
     }
 }

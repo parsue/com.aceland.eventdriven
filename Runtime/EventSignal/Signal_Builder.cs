@@ -1,8 +1,8 @@
 ﻿using System;
 using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
+using AceLand.Lifecycle;
 using AceLand.Optional;
-using AceLand.PlayerLoopHack;
 
 namespace AceLand.EventDriven.EventSignal
 {
@@ -20,7 +20,7 @@ namespace AceLand.EventDriven.EventSignal
         public interface ISignalTriggerStateBuilder : ISignalFinalBuilder
         {
             ISignalFinalBuilder WithTriggerOncePerFrame();
-            ISignalFinalBuilder WithTriggerOncePerFrame(PlayerLoopState triggerState);
+            ISignalFinalBuilder WithTriggerOncePerFrame(PlayerLoopPoint triggerState);
         }
 
         public interface ISignalValueBuilder
@@ -38,7 +38,7 @@ namespace AceLand.EventDriven.EventSignal
         {
             private Option<string> _id = Option<string>.None();
             private SignalTriggerMethod _triggerMethod = SignalTriggerMethod.Immediately;
-            private PlayerLoopState _triggerState;
+            private PlayerLoopPoint _triggerState;
 
             public ISignal Build()
             {
@@ -68,7 +68,7 @@ namespace AceLand.EventDriven.EventSignal
                 return this;
             }
 
-            public ISignalFinalBuilder WithTriggerOncePerFrame(PlayerLoopState triggerState)
+            public ISignalFinalBuilder WithTriggerOncePerFrame(PlayerLoopPoint triggerState)
             {
                 _triggerMethod = SignalTriggerMethod.OncePerFrame;
                 _triggerState = triggerState;

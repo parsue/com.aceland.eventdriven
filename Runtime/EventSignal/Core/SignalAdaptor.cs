@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AceLand.Disposable;
 using ZLinq;
 
 namespace AceLand.EventDriven.EventSignal.Core
@@ -13,7 +12,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         bool Result();
     }
     
-    internal class SignalAdaptor : DisposableObject, ISignalAdaptor
+    internal class SignalAdaptor : IDisposable, ISignalAdaptor
     {
         internal static SignalAdaptor Create<T>(AdaptorOption option)
         {
@@ -21,9 +20,8 @@ namespace AceLand.EventDriven.EventSignal.Core
             return adaptor;
         }
 
-        protected override void DisposeManagedResources()
+        public virtual void Dispose()
         {
-            base.DisposeManagedResources();
             foreach (var adaptor in adaptorData)
                 adaptor.Dispose();
         }

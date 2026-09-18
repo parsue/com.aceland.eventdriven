@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.0] - 2026-09-18
+### Modified
+- Ready for CoreCLR, auto clearup static values
+- [Dependency] use Lifecycle runtime, remove PlayerLoopHack and TaskUtils
+
+---
+
 ## [2.5.1] - 2026-04-24
 ### Added
 - [Bus] added RaiseWithoutCache()

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.EventDriven.Exceptions;
-using AceLand.TaskUtils;
+using AceLand.Lifecycle;
 using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
@@ -77,30 +77,30 @@ namespace AceLand.EventDriven.EventSignal
         public static bool TryGetTrigger<TEnum>(TEnum id, out ISignalTrigger<T> trigger) where TEnum: Enum =>
             TryGetTrigger(id.ToString(), out trigger);
 
-        public static Promise<ISignal<T>> GetAsync(string id) =>
+        public static Task<ISignal<T>> GetAsync(string id) =>
             GetSignalAsync(id); 
-        public static Promise<IReadonlySignal<T>> GetReadonlyAsync(string id) =>
+        public static Task<IReadonlySignal<T>> GetReadonlyAsync(string id) =>
             GetReadonlySignalAsync(id);
-        public static Promise<ISignalListener<T>> GetListenerAsync(string id) =>
+        public static Task<ISignalListener<T>> GetListenerAsync(string id) =>
             GetSignalListenerAsync(id);
-        public static Promise<ISignalTrigger<T>> GetTriggerAsync(string id) =>
+        public static Task<ISignalTrigger<T>> GetTriggerAsync(string id) =>
             GetSignalTriggerAsync(id);
         
-        public static Promise<ISignal<T>> GetAsync<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Task<ISignal<T>> GetAsync<TEnum>(TEnum id) where TEnum: Enum =>
             GetAsync(id.ToString()); 
-        public static Promise<IReadonlySignal<T>> GetReadonlyAsync<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Task<IReadonlySignal<T>> GetReadonlyAsync<TEnum>(TEnum id) where TEnum: Enum =>
             GetReadonlyAsync(id.ToString());
-        public static Promise<ISignalListener<T>> GetListenerAsync<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Task<ISignalListener<T>> GetListenerAsync<TEnum>(TEnum id) where TEnum: Enum =>
             GetListenerAsync(id.ToString());
-        public static Promise<ISignalTrigger<T>> GetTriggerAsync<TEnum>(TEnum id) where TEnum: Enum =>
+        public static Task<ISignalTrigger<T>> GetTriggerAsync<TEnum>(TEnum id) where TEnum: Enum =>
             GetTriggerAsync(id.ToString());
 
         private static async Task<ISignal<T>> GetSignalAsync(string id)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException(nameof(id));
-            
-            var aliveToken = Promise.ApplicationAliveToken;
+
+            var aliveToken = LifecycleToken.ApplicationAlive;
             var targetTime = DateTime.Now.AddSeconds(EventDrivenUtils.Settings.SignalGetterTimeout);
             string msg;
 

@@ -8,7 +8,7 @@ namespace AceLand.EventDriven.Bus
         private static CacheService Cache;
         private static RegistryService Registry;
 
-        public static void Initialize()
+        internal static void Initialize()
         {
             Signatures = SignatureService.Build();
             Cache = CacheService.Build();

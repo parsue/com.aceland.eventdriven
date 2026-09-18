@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using AceLand.Disposable;
-using AceLand.PlayerLoopHack;
-using AceLand.TaskUtils;
+using AceLand.Lifecycle;
 using ZLinq;
 
 namespace AceLand.EventDriven.EventSignal.Core
 {
-    internal class SignalLinker : DisposableObject, ISignalLinker
+    internal class SignalLinker : IDisposable, ISignalLinker
     {
         internal static SignalLinker Create(
             string id,
             SignalTriggerMethod triggerMethod,
-            PlayerLoopState triggerState
+            PlayerLoopPoint triggerState
         ) => new(id, triggerMethod, triggerState);
         
         private SignalLinker(
             string id,
             SignalTriggerMethod triggerMethod,
-            PlayerLoopState triggerState
+            PlayerLoopPoint triggerState
         )
         {
             Id = id;
@@ -26,9 +24,9 @@ namespace AceLand.EventDriven.EventSignal.Core
             _triggerState = triggerState;
         }
         
-        ~SignalLinker() => Dispose(false);
+        ~SignalLinker() => Dispose();
         
-        protected override void DisposeManagedResources()
+        public virtual void Dispose()
         {
             Signals.UnRegistrySignal(this);
             _observers.Dispose();
@@ -40,7 +38,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         private readonly Dictionary<AdaptorOption, ISignalAdaptor> adaptors = new();
         private readonly Observers<bool> _observers = new();
         private readonly SignalTriggerMethod _triggerMethod;
-        private readonly PlayerLoopState _triggerState;
+        private readonly PlayerLoopPoint _triggerState;
         private bool _triggeredInThisFrame;
 
         public void AddAdaptor<T>(
@@ -98,7 +96,7 @@ namespace AceLand.EventDriven.EventSignal.Core
                 case SignalTriggerMethod.OncePerFrame:
                     if (_triggeredInThisFrame) return;
                     _triggeredInThisFrame = true;
-                    Promise.Dispatcher.Run(SystemTrigger, _triggerState);
+                    LifecycleFrame.RunEveryFrame(SystemTrigger, _triggerState, maxFrames: 1);
                     return;
 
                 default:
