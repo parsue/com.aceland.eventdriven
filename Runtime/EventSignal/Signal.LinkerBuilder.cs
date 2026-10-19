@@ -1,23 +1,14 @@
 ﻿using System;
-using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.Lifecycle;
-using AceLand.Optional;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public partial class Signal
+    public static partial class Signal
     {
-        public interface ISignalLinkerBuilder : ISignalLinkerTriggerStateBuilder
+        public interface ISignalLinkerBuilder : ISignalLinkerFinalBuilder
         {
-            ISignalLinkerTriggerStateBuilder WithId(string id);
-            ISignalLinkerTriggerStateBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
-        }
-
-        public interface ISignalLinkerTriggerStateBuilder : ISignalLinkerFinalBuilder
-        {
-            ISignalLinkerFinalBuilder WithTriggerOncePerFrame();
-            ISignalLinkerFinalBuilder WithTriggerOncePerFrame(PlayerLoopPoint triggerState);
+            ISignalLinkerFinalBuilder WithId(string id);
+            ISignalLinkerFinalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum;
         }
 
         public interface ISignalLinkerFinalBuilder
@@ -27,41 +18,25 @@ namespace AceLand.EventDriven.EventSignal
 
         private class SignalLinkerBuilder : ISignalLinkerBuilder
         {
-            private Option<string> _id = Option<string>.None();
-            private SignalTriggerMethod _triggerMethod = SignalTriggerMethod.Immediately;
-            private PlayerLoopPoint _triggerState;
+            private string _id;
             
             public ISignalLinker Build()
             {
-                var id = _id.Reduce(Guid.NewGuid().ToString);
-                var linker = SignalLinker.Create(id, _triggerMethod, _triggerState);
+                var id = _id ?? Guid.NewGuid().ToString();
+                var linker = SignalLinker.Create(id);
                 Signals.RegistrySignal(linker);
                 return linker;
             }
 
-            public ISignalLinkerTriggerStateBuilder WithId(string id)
+            public ISignalLinkerFinalBuilder WithId(string id)
             {
-                _id = id.ToOption();
+                _id = id;
                 return this;
             }
 
-            public ISignalLinkerTriggerStateBuilder WithId<TEnum>(TEnum id) where TEnum : Enum
+            public ISignalLinkerFinalBuilder WithId<TEnum>(TEnum id) where TEnum : Enum
             {
-                _id = id.ToString().ToOption();
-                return this;
-            }
-
-            public ISignalLinkerFinalBuilder WithTriggerOncePerFrame()
-            {
-                _triggerMethod = SignalTriggerMethod.OncePerFrame;
-                _triggerState = EventDrivenUtils.Settings.SignalTriggerState;
-                return this;
-            }
-
-            public ISignalLinkerFinalBuilder WithTriggerOncePerFrame(PlayerLoopPoint triggerState)
-            {
-                _triggerMethod = SignalTriggerMethod.OncePerFrame;
-                _triggerState = triggerState;
+                _id = id.ToString();
                 return this;
             }
         }

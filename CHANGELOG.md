@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.1.0] - 2026-10-19
+### Added
+- [Bus] source-generated event registration (zero reflection scan at startup)
+- [Editor] Event Monitor window for live inspection of events, listeners, payloads and raise history
+- [Editor] Settings Provider (Project/AceLand Packages/EventDriven) with Signal Getter Timeout
+- [Editor] formal Licensing integration via LicenseBridge
+### Modified
+- Converted to a zero-dependency Core Package (no runtime package dependencies)
+
+---
+
 ## [3.0.0] - 2026-09-18
 ### Modified
 - Ready for CoreCLR, auto clearup static values

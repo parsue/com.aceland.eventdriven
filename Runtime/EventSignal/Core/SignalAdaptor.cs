@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ZLinq;
+using System.Linq;
 
 namespace AceLand.EventDriven.EventSignal.Core
 {
@@ -46,8 +46,8 @@ namespace AceLand.EventDriven.EventSignal.Core
         {
             return Option switch
             {
-                AdaptorOption.And => adaptorData.AsValueEnumerable().All(a => a.Result()),
-                AdaptorOption.Or => adaptorData.AsValueEnumerable().Any(a => a.Result()),
+                AdaptorOption.And => adaptorData.All(a => a.Result()),
+                AdaptorOption.Or => adaptorData.Any(a => a.Result()),
                 _ => false
             };
         }

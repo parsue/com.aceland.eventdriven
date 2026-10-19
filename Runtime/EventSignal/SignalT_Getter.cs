@@ -3,23 +3,21 @@ using System.Threading.Tasks;
 using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.EventDriven.Exceptions;
-using AceLand.Lifecycle;
-using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public partial class Signal<T>
+    public static partial class Signal<T>
     {
         public static ISignal<T> GetOrCreate(string id)
         {
-            return Signals.TryGetSignal(id, out Signal<T> s) == 0
+            return Signals.TryGetSignal(id, out SignalObject<T> s) == 0
                 ? s
                 : Signal.Builder().WithId(id).WithValue<T>().Build();
         }
         
         public static bool TryGet(string id, out ISignal<T> signal)
         {
-            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            if (Signals.TryGetSignal(id, out SignalObject<T> s) != 0)
             {
                 signal = null;
                 return false;
@@ -31,7 +29,7 @@ namespace AceLand.EventDriven.EventSignal
         
         public static bool TryGetReadonly(string id, out IReadonlySignal<T> readonlySignal)
         {
-            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            if (Signals.TryGetSignal(id, out SignalObject<T> s) != 0)
             {
                 readonlySignal = null;
                 return false;
@@ -43,7 +41,7 @@ namespace AceLand.EventDriven.EventSignal
 
         public static bool TryGetListener(string id, out ISignalListener<T> listener)
         {
-            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            if (Signals.TryGetSignal(id, out SignalObject<T> s) != 0)
             {
                 listener = null;
                 return false;
@@ -55,7 +53,7 @@ namespace AceLand.EventDriven.EventSignal
         
         public static bool TryGetTrigger(string id, out ISignalTrigger<T> trigger)
         {
-            if (Signals.TryGetSignal(id, out Signal<T> s) != 0)
+            if (Signals.TryGetSignal(id, out SignalObject<T> s) != 0)
             {
                 trigger = null;
                 return false;
@@ -100,16 +98,14 @@ namespace AceLand.EventDriven.EventSignal
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException(nameof(id));
 
-            var aliveToken = LifecycleToken.ApplicationAlive;
-            var targetTime = DateTime.Now.AddSeconds(EventDrivenUtils.Settings.SignalGetterTimeout);
+            var targetTime = DateTime.Now.AddSeconds(EventDrivenUtils.SignalGetterTimeout);
             string msg;
 
-            while (!aliveToken.IsCancellationRequested && DateTime.Now < targetTime)
+            while (UnityEngine.Application.isPlaying && DateTime.Now < targetTime)
             {
                 await Task.Yield();
 
-                var arg = Signals.TryGetSignal(id, out Signal<T> signal);
-                Debug.Log($"result: {arg}");
+                var arg = Signals.TryGetSignal(id, out SignalObject<T> signal);
                 switch (arg)
                 {
                     case 0:
@@ -124,7 +120,6 @@ namespace AceLand.EventDriven.EventSignal
                 }
             }
 
-            Debug.Log(99);
             msg = $"Signal [{id}] is not found";
             throw new SignalNotFoundException(msg);
         }

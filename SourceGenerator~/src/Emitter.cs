@@ -1,0 +1,113 @@
+using System.Collections.Generic;
+using System.Text;
+
+namespace AceLand.EventDriven.SourceGenerator
+{
+    internal static class Emitter
+    {
+        public const string GeneratedNamespace = "AceLand.EventDriven.Bus.Generated";
+
+        /// <summary>
+        /// Emits a per-assembly bootstrap class that pushes every discovered event
+        /// interface into the runtime registry via EventBus.__RegisterGeneratedEvent.
+        /// A [RuntimeInitializeOnLoadMethod] entry point runs the registration at play
+        /// time without any reflection (IL2CPP-safe). Additionally, a
+        /// [UnityEditor.InitializeOnLoadMethod] entry point (guarded by #if UNITY_EDITOR)
+        /// runs the exact same zero-reflection registration in the editor's edit mode so
+        /// the Event Monitor window can inspect signatures without entering play mode.
+        /// Both entry points delegate to a single private __RegisterAll() to avoid
+        /// duplicated emission. The registration store in EventBus retains the entries
+        /// regardless of init order relative to EventBus.Initialize().
+        /// </summary>
+        public static string EmitBootstrap(string assemblyName, IReadOnlyList<EventModel> events, string version)
+        {
+            var className = "__EventDrivenBootstrap_" + Sanitize(assemblyName);
+
+            var sb = new StringBuilder();
+            Header(sb, version);
+            sb.AppendLine($"namespace {GeneratedNamespace}");
+            sb.AppendLine("{");
+            sb.AppendLine("    using System;");
+            sb.AppendLine();
+            sb.AppendLine($"    [global::System.CodeDom.Compiler.GeneratedCode(\"AceLand.EventDriven.SourceGenerator\", \"{version}\")]");
+            sb.AppendLine($"    internal static class {className}");
+            sb.AppendLine("    {");
+
+            // Play-mode entry point (IL2CPP-safe, runs in builds and play mode).
+            sb.AppendLine("        [global::UnityEngine.RuntimeInitializeOnLoadMethod(global::UnityEngine.RuntimeInitializeLoadType.AfterAssembliesLoaded)]");
+            sb.AppendLine("        internal static void __Register()");
+            sb.AppendLine("        {");
+            sb.AppendLine("            __RegisterAll();");
+            sb.AppendLine("        }");
+            sb.AppendLine();
+
+            // Edit-mode entry point (editor only; populates the registry for the monitor
+            // window without requiring play mode). Excluded from player builds.
+            sb.AppendLine("#if UNITY_EDITOR");
+            sb.AppendLine("        [global::UnityEditor.InitializeOnLoadMethod]");
+            sb.AppendLine("        internal static void __RegisterEditor()");
+            sb.AppendLine("        {");
+            sb.AppendLine("            __RegisterAll();");
+            sb.AppendLine("        }");
+            sb.AppendLine("#endif");
+            sb.AppendLine();
+
+            // Shared zero-reflection registration body.
+            sb.AppendLine("        private static void __RegisterAll()");
+            sb.AppendLine("        {");
+
+            for (var i = 0; i < events.Count; i++)
+                EmitRegisterCall(sb, events[i]);
+
+            sb.AppendLine("        }");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+
+        private static void EmitRegisterCall(StringBuilder sb, EventModel e)
+        {
+            var desc = e.Description is null ? "null" : Quote(e.Description);
+            sb.AppendLine("            global::AceLand.EventDriven.Bus.EventBus.__RegisterGeneratedEvent(");
+            sb.AppendLine($"                eventType: typeof({e.FullyQualifiedName}),");
+            sb.AppendLine($"                displayName: {Quote(e.DisplayName)},");
+            sb.AppendLine($"                description: {desc},");
+
+            if (e.Kind == EventKind.NoPayload)
+            {
+                sb.AppendLine("                hasPayload: false,");
+                sb.AppendLine("                payloadType: null,");
+                sb.AppendLine($"                binder: static __instance => (System.Action)(({e.FullyQualifiedName})__instance).{e.MethodName},");
+                sb.AppendLine("                cacheSender: static (__del, __data) => ((System.Action)__del)?.Invoke());");
+            }
+            else
+            {
+                sb.AppendLine("                hasPayload: true,");
+                sb.AppendLine($"                payloadType: typeof({e.PayloadFqn}),");
+                sb.AppendLine($"                binder: static __instance => (System.Action<{e.PayloadFqn}>)(({e.FullyQualifiedName})__instance).{e.MethodName},");
+                sb.AppendLine($"                cacheSender: static (__del, __data) => ((System.Action<{e.PayloadFqn}>)__del)?.Invoke(({e.PayloadFqn})__data));");
+            }
+        }
+
+        private static void Header(StringBuilder sb, string version)
+        {
+            sb.AppendLine($"// <auto-generated by AceLand.EventDriven.SourceGenerator {version} />");
+            sb.AppendLine("#pragma warning disable");
+            sb.AppendLine("#nullable disable");
+            sb.AppendLine();
+        }
+
+        private static string Sanitize(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "Unknown";
+            var sb = new StringBuilder(s.Length);
+            foreach (var ch in s)
+                sb.Append(char.IsLetterOrDigit(ch) ? ch : '_');
+            if (char.IsDigit(sb[0])) sb.Insert(0, '_');
+            return sb.ToString();
+        }
+
+        private static string Quote(string s)
+            => "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "").Replace("\n", "\\n") + "\"";
+    }
+}

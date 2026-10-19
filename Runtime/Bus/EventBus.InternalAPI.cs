@@ -1,4 +1,5 @@
 ﻿using System;
+using AceLand.EventDriven.Bus.Core;
 
 namespace AceLand.EventDriven.Bus
 {
@@ -53,14 +54,14 @@ namespace AceLand.EventDriven.Bus
             Registry.SendCacheToDelegate(typeof(TEvent), listener);
         }
 
-        internal static void RaiseEvent(Type eventType, bool setCache)
+        internal static void RaiseEvent(Type eventType, CacheSpec? cacheSpec)
         {
-            Registry.RaiseEvent(eventType, setCache);
+            Registry.RaiseEvent(eventType, cacheSpec);
         }
 
-        internal static void RaiseEvent<TPayload>(Type eventType, TPayload payload, bool setCache)
+        internal static void RaiseEvent<TPayload>(Type eventType, TPayload payload, CacheSpec? cacheSpec)
         {
-            Registry.RaiseEvent(eventType, payload, setCache);
+            Registry.RaiseEvent(eventType, payload, cacheSpec);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using AceLand.EventDriven.Bus;
-using AceLand.EventDriven.Core;
 using UnityEngine;
 
 namespace AceLand.EventDriven
@@ -10,10 +9,6 @@ namespace AceLand.EventDriven
         private static void Initialization()
         {
             EventBus.Initialize();
-            
-            var settings = EventDrivenUtils.Settings;
-            foreach (var provider in settings.PrewarmProviders)
-                provider.PrewarmSignal();
         }
     }
 }

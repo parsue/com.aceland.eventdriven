@@ -3,23 +3,22 @@ using System.Threading.Tasks;
 using AceLand.EventDriven.Core;
 using AceLand.EventDriven.EventSignal.Core;
 using AceLand.EventDriven.Exceptions;
-using AceLand.Lifecycle;
 using UnityEngine;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public partial class Signal
+    public static partial class Signal
     {
         public static ISignal GetOrCreate(string id)
         {
-            return Signals.TryGetSignal(id, out Signal s) == 0
+            return Signals.TryGetSignal(id, out SignalObject s) == 0
                 ? s
                 : Builder().WithId(id).Build();
         }
         
         public static bool TryGet(string id, out ISignal signal)
         {
-            if (Signals.TryGetSignal(id, out Signal s) != 0)
+            if (Signals.TryGetSignal(id, out SignalObject s) != 0)
             {
                 signal = null;
                 return false;
@@ -43,7 +42,7 @@ namespace AceLand.EventDriven.EventSignal
 
         public static bool TryGetListener(string id, out ISignalListener listener)
         {
-            if (Signals.TryGetSignal(id, out Signal s) != 0)
+            if (Signals.TryGetSignal(id, out SignalObject s) != 0)
             {
                 listener = null;
                 return false;
@@ -55,7 +54,7 @@ namespace AceLand.EventDriven.EventSignal
         
         public static bool TryGetTrigger(string id, out ISignalTrigger trigger)
         {
-            if (Signals.TryGetSignal(id, out Signal s) != 0)
+            if (Signals.TryGetSignal(id, out SignalObject s) != 0)
             {
                 trigger = null;
                 return false;
@@ -97,7 +96,7 @@ namespace AceLand.EventDriven.EventSignal
         
         private static async Task<ISignal> GetSignalAsync(string id)
         {
-            return await GetSignalTAsync<Signal>(id);
+            return await GetSignalTAsync<SignalObject>(id);
         }
         
         private static async Task<ISignalLinker> GetSignalLinkerAsync(string id)
@@ -107,24 +106,23 @@ namespace AceLand.EventDriven.EventSignal
         
         private static async Task<ISignalListener> GetSignalListenerAsync(string id)
         {
-            var signal = await GetSignalTAsync<Signal>(id);
+            var signal = await GetSignalTAsync<SignalObject>(id);
             return signal.AsListener();
         }
         
         private static async Task<ISignalTrigger> GetSignalTriggerAsync(string id)
         {
-            var signal = await GetSignalTAsync<Signal>(id);
+            var signal = await GetSignalTAsync<SignalObject>(id);
             return signal.AsTrigger();
         }
 
         private static async Task<T> GetSignalTAsync<T>(string id)
             where T : IEventSignal
         {
-            var aliveToken = LifecycleToken.ApplicationAlive;
-            var targetTime = Time.realtimeSinceStartup + EventDrivenUtils.Settings.SignalGetterTimeout;
+            var targetTime = Time.realtimeSinceStartup + EventDrivenUtils.SignalGetterTimeout;
             string msg;
     
-            while (!aliveToken.IsCancellationRequested && Time.realtimeSinceStartup < targetTime)
+            while (Application.isPlaying && Time.realtimeSinceStartup < targetTime)
             {
                 var arg = Signals.TryGetSignal(id, out T signal);
                 

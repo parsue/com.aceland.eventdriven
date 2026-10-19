@@ -1,5 +1,5 @@
 ﻿using System;
-using ZLinq;
+using System.Linq;
 
 namespace AceLand.EventDriven.Bus.Builders
 {
@@ -77,7 +77,6 @@ namespace AceLand.EventDriven.Bus.Builders
                 _instance = instance ?? throw new ArgumentNullException(nameof(instance));
                 _eventInterfaces = _instance.GetType()
                     .GetInterfaces()
-                    .AsValueEnumerable()
                     .Where(t =>
                         t.IsInterface &&
                         typeof(IBusEvent).IsAssignableFrom(t) &&

@@ -1,0 +1,24 @@
+{
+  "name": "AceLand.EventDriven.LicenseBridge",
+  "rootNamespace": "AceLand.EventDriven.LicenseBridge",
+  "references": [
+    "GUID:bab11d0e13a2e804789384dc915956be"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [
+    {
+      "name": "com.aceland.licensing",
+      "expression": "1.0.1",
+      "define": "ACELAND_LICENSING"
+    }
+  ],
+  "noEngineReferences": false
+}

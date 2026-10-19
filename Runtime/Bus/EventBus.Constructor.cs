@@ -10,11 +10,15 @@ namespace AceLand.EventDriven.Bus
 
         internal static void Initialize()
         {
+            // Dispose the previous CacheService (if any) so its SceneManager.sceneUnloaded
+            // subscription is released before a new one subscribes (no-domain-reload safe).
+            Cache?.InternalDispose();
+
             Signatures = SignatureService.Build();
             Cache = CacheService.Build();
             Registry = RegistryService.Build(Signatures, Cache);
 
-            Signatures.InitializeAndScan();
+            Signatures.InitializeFromGenerated();
             Registry.BootstrapReset();
         }
     }

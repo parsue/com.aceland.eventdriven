@@ -8,17 +8,18 @@ namespace AceLand.EventDriven.Bus
         public static void Raise(this EventRaiserBuilders.IEventRaiser<IEvent> raiser)
         {
             if (raiser is EventRaiserBuilders.IEventRaiserInternal internalRaiser)
-                internalRaiser.InternalRaise(true);
+                internalRaiser.InternalRaise(null);
             else
                 throw new InvalidOperationException("Invalid raiser implementation.");
         }
-        
-        public static void RaiseWithoutCache(this EventRaiserBuilders.IEventRaiser<IEvent> raiser)
+
+        public static EventRaiserBuilders.IEventRaiserCacheBuilder WithCache(
+            this EventRaiserBuilders.IEventRaiser<IEvent> raiser)
         {
             if (raiser is EventRaiserBuilders.IEventRaiserInternal internalRaiser)
-                internalRaiser.InternalRaise(false);
-            else
-                throw new InvalidOperationException("Invalid raiser implementation.");
+                return internalRaiser.InternalWithCache();
+
+            throw new InvalidOperationException("Invalid raiser implementation.");
         }
 
         public static EventRaiserBuilders.IEventRaiserRaiseBuilder WithData<TData>(

@@ -1,24 +1,21 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.Lifecycle;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public partial class Signal : IDisposable
+    internal sealed partial class SignalObject : IDisposable
     {
-        private Signal(string id, Observers observers, SignalTriggerMethod triggerMethod, PlayerLoopPoint triggerState)
+        internal SignalObject(string id, Observers observers)
         {
             Id = id;
             _observers = observers;
-            _triggerMethod = triggerMethod;
-            _triggerState = triggerState;
         }
 
-        ~Signal() => Dispose();
+        ~SignalObject() => Dispose();
         
         public bool Disposed { get; private set; }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
             if (Disposed) return;
 

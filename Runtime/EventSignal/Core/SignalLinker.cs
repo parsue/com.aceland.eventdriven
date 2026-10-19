@@ -1,27 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using AceLand.Lifecycle;
-using ZLinq;
+using System.Linq;
 
 namespace AceLand.EventDriven.EventSignal.Core
 {
     internal class SignalLinker : IDisposable, ISignalLinker
     {
-        internal static SignalLinker Create(
-            string id,
-            SignalTriggerMethod triggerMethod,
-            PlayerLoopPoint triggerState
-        ) => new(id, triggerMethod, triggerState);
+        internal static SignalLinker Create(string id) => new(id);
         
-        private SignalLinker(
-            string id,
-            SignalTriggerMethod triggerMethod,
-            PlayerLoopPoint triggerState
-        )
+        private SignalLinker(string id)
         {
             Id = id;
-            _triggerMethod = triggerMethod;
-            _triggerState = triggerState;
         }
         
         ~SignalLinker() => Dispose();
@@ -37,9 +26,6 @@ namespace AceLand.EventDriven.EventSignal.Core
         
         private readonly Dictionary<AdaptorOption, ISignalAdaptor> adaptors = new();
         private readonly Observers<bool> _observers = new();
-        private readonly SignalTriggerMethod _triggerMethod;
-        private readonly PlayerLoopPoint _triggerState;
-        private bool _triggeredInThisFrame;
 
         public void AddAdaptor<T>(
             ISignalListener<T> signalListener,
@@ -87,32 +73,12 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         public void Trigger()
         {
-            switch (_triggerMethod)
-            {
-                case SignalTriggerMethod.Immediately:
-                    _observers.Trigger(GetResult());
-                    return;
-                
-                case SignalTriggerMethod.OncePerFrame:
-                    if (_triggeredInThisFrame) return;
-                    _triggeredInThisFrame = true;
-                    LifecycleFrame.RunEveryFrame(SystemTrigger, _triggerState, maxFrames: 1);
-                    return;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        private void SystemTrigger()
-        {
             _observers.Trigger(GetResult());
-            _triggeredInThisFrame = false;
         }
 
         private bool GetResult()
         {
-            return adaptors.Values.AsValueEnumerable().All(a => a.Result());
+            return adaptors.Values.All(a => a.Result());
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using AceLand.EventDriven.Bus.Core;
+#if UNITY_EDITOR
 using UnityEngine;
-using ZLinq;
+#endif
 
 namespace AceLand.EventDriven.Bus.Services
 {
@@ -18,70 +18,20 @@ namespace AceLand.EventDriven.Bus.Services
 
         private readonly Dictionary<Type, EventSignature> _signatures;
 
-        public void InitializeAndScan()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var iBusEvent = typeof(IBusEvent);
-
-            var eventInterfaces = assemblies
-                .AsValueEnumerable()
-                .SelectMany(a =>
-                {
-                    try
-                    {
-                        return a.GetTypes();
-                    }
-                    catch (ReflectionTypeLoadException ex)
-                    {
-                        return ex.Types.AsValueEnumerable().Where(t => t != null).ToArray();
-                    }
-                })
-                .Where(t =>
-                    t is { IsInterface: true } &&
-                    iBusEvent.IsAssignableFrom(t) &&
-                    t != iBusEvent &&
-                    t != typeof(IEvent) &&
-                    (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(IEvent<>))
-                )
-                .ToArray();
-
-            BootstrapRegister(eventInterfaces);
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            var listenerTypes = assemblies
-                .AsValueEnumerable()
-                .SelectMany(a =>
-                {
-                    try
-                    {
-                        return a.GetTypes();
-                    }
-                    catch (ReflectionTypeLoadException ex)
-                    {
-                        return ex.Types.AsValueEnumerable().Where(t => t != null).ToArray();
-                    }
-                })
-                .Where(t =>
-                    t is { IsClass: true, IsAbstract: false } &&
-                    t.GetInterfaces().AsValueEnumerable().Any(i => eventInterfaces.AsValueEnumerable().Contains(i))
-                )
-                .ToArray();
-
-            Debug.Log(
-                $"EventBus: Registered {eventInterfaces.Length} event interfaces. Potential listener types: {listenerTypes.Length}.");
-#endif
-        }
-
-        private void BootstrapRegister(IEnumerable<Type> eventInterfaces)
+        /// <summary>
+        /// Snapshot the compile-time signatures pushed by the source-generated
+        /// per-assembly bootstrap. No reflection / assembly scanning.
+        /// </summary>
+        public void InitializeFromGenerated()
         {
             _signatures.Clear();
 
-            foreach (var it in eventInterfaces)
-            {
-                var sig = BuildSignature(it);
-                if (sig == null) continue;
-                _signatures[it] = sig;
-            }
+            foreach (var kvp in EventBus.GeneratedSignatureStore)
+                _signatures[kvp.Key] = kvp.Value;
+
+#if UNITY_EDITOR
+            Debug.Log($"[EventBus] Registered {_signatures.Count} event interfaces (source-generated).");
+#endif
         }
 
         public EventSignature GetOrThrowSignature(Type eventInterface)
@@ -89,96 +39,14 @@ namespace AceLand.EventDriven.Bus.Services
             return _signatures.TryGetValue(eventInterface, out var sig)
                 ? sig
                 : throw new InvalidOperationException(
-                    $"Event interface {eventInterface.Name} is not registered. Ensure EventBus.Initialize() ran.");
+                    $"Event interface {eventInterface.Name} is not registered. " +
+                    "Ensure the assembly declaring it references AceLand.EventDriven so the " +
+                    "source generator can emit its registration, and that EventBus.Initialize() ran.");
         }
 
-        private static EventSignature BuildSignature(Type eventInterface)
-        {
-            EventBus.EnsureIsEventInterface(eventInterface);
+        public bool TryGetSignature(Type eventInterface, out EventSignature signature)
+            => _signatures.TryGetValue(eventInterface, out signature);
 
-            var methods = eventInterface.GetMethods();
-            if (methods.Length != 1)
-            {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.LogError($"Event interface {eventInterface} must declare exactly one method.");
-#endif
-                return null;
-            }
-
-            var m = methods[0];
-            if (m.ReturnType != typeof(void))
-            {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.LogError($"Event method {eventInterface}.{m.Name} must return void.");
-#endif
-                return null;
-            }
-
-            var pars = m.GetParameters();
-            var isNoData = typeof(IEvent).IsAssignableFrom(eventInterface);
-            var isWithData = eventInterface.GetInterfaces().AsValueEnumerable().Any(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEvent<>));
-
-            if (isNoData && isWithData)
-            {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.LogError($"Event interface {eventInterface} cannot implement both IEvent and IEvent<T>.");
-#endif
-                return null;
-            }
-
-            if (!isNoData && !isWithData)
-            {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.LogError($"Event interface {eventInterface} must implement either IEvent or IEvent<T>.");
-#endif
-                return null;
-            }
-
-            switch (pars.Length)
-            {
-                case 0:
-                    if (!isNoData)
-                    {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                        Debug.LogError(
-                            $"Event method {eventInterface}.{m.Name} has 0 parameters but does not implement IEvent.");
-#endif
-                        return null;
-                    }
-
-                    return new EventSignature(eventInterface, m, EventSignatureKind.NoPayload, null);
-                case 1:
-                    if (!isWithData)
-                    {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                        Debug.LogError(
-                            $"Event method {eventInterface}.{m.Name} has 1 parameter but does not implement IEvent<T>.");
-#endif
-                        return null;
-                    }
-
-                    var payloadType = pars[0].ParameterType;
-                    var withDataInterface = eventInterface.GetInterfaces().AsValueEnumerable().First(i =>
-                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEvent<>));
-                    var genericArg = withDataInterface.GetGenericArguments()[0];
-
-                    // --- VALIDATION: Check if TData matches the method's payload parameter ---
-                    if (payloadType == genericArg)
-                        return new EventSignature(eventInterface, m, EventSignatureKind.SinglePayload, payloadType);
-                    
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    Debug.LogError(
-                        $"[EventBus] Type Mismatch in {eventInterface.Name}! It implements IEvent<{genericArg.Name}>, but the method '{m.Name}' expects a payload of type '{payloadType.Name}'. These must be exactly the same.");
-#endif
-                    return null;
-
-                default:
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    Debug.LogError($"Event method {eventInterface}.{m.Name} must have 0 or 1 parameters.");
-#endif
-                    return null;
-            }
-        }
+        public IReadOnlyCollection<EventSignature> Signatures => _signatures.Values;
     }
 }

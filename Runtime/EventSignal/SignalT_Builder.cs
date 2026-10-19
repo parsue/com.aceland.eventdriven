@@ -1,11 +1,9 @@
 ﻿using System;
 using AceLand.EventDriven.EventSignal.Core;
-using AceLand.Lifecycle;
-using AceLand.Optional;
 
 namespace AceLand.EventDriven.EventSignal
 {
-    public partial class Signal<T>
+    public static partial class Signal<T>
     {
         public interface ISignalFinalBuilder<TValue>
         {
@@ -14,27 +12,23 @@ namespace AceLand.EventDriven.EventSignal
 
         internal class SignalBuilder<TValue> : ISignalFinalBuilder<TValue>
         {
-            internal SignalBuilder(Option<string> id, TValue value, SignalTriggerMethod triggerMethod, PlayerLoopPoint triggerState)
+            internal SignalBuilder(string id, TValue value)
             {
                 _id = id;
                 _value = value;
-                _triggerMethod = triggerMethod;
-                _triggerState = triggerState;
             }
             
-            private Option<string> _id;
+            private readonly string _id;
             private readonly TValue _value;
-            private readonly SignalTriggerMethod _triggerMethod;
-            private readonly PlayerLoopPoint _triggerState;
 
             public ISignal<TValue> Build() =>
                 BuildSignal();
 
             private ISignal<TValue> BuildSignal()
             {
-                var id = _id.Reduce(Guid.NewGuid().ToString);
+                var id = _id ?? Guid.NewGuid().ToString();
                 var observers = new Observers<TValue>();
-                var signal = new Signal<TValue>(id, observers, _value, _triggerMethod, _triggerState);
+                var signal = new SignalObject<TValue>(id, observers, _value);
                 Signals.RegistrySignal(signal);
                 return signal;
             }

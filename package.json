@@ -1,9 +1,9 @@
 {
   "name": "com.aceland.eventdriven",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "displayName": "AceLand Event Driven",
-  "description": "AceLand Event Driven is a framework designed for Unity.\n\nPlease visit our [Git Book](https://aceland-workshop.gitbook.io/aceland-unity-packages).",
-  "unity": "2022.3",
+  "description": "AceLand Event Driven is a zero-dependency Core framework for Unity, providing a type-safe EventBus (interface-based events with source-generated registration) and Signals (reactive values with linkers). Includes an Editor Event Monitor window for live inspection of events, listeners, payloads and raise history.\n\nPlease visit our [Git Book](https://aceland-workshop.gitbook.io/aceland-unity-packages/core-packages/event-driven).",
+  "unity": "2023.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/parsue/com.aceland.eventdriven.git"
@@ -23,16 +23,12 @@
     "eventbus",
     "bus"
   ],
-  "dependencies": {
-    "com.aceland.lifecycle": "1.0.3",
-    "com.aceland.optional": "1.2.0",
-    "com.aceland.projectsetting": "1.0.0"
-  },
+  "dependencies": {},
   "publishConfig": {
     "registry": "https://package.openupm.com"
   },
-  "documentationUrl": "https://docs.parsue.io/aceland-unity-packages/packages/event-driven",
+  "documentationUrl": "https://docs.parsue.io/aceland-unity-packages/packages/core-packages/event-driven",
   "type": "framework",
   "licensesUrl": "https://docs.parsue.io/aceland-unity-packages/getting-started/license",
-  "changelogUrl": "https://docs.parsue.io/aceland-unity-packages/packages/event-driven/change-log"
+  "changelogUrl": "https://docs.parsue.io/aceland-unity-packages/core-packages/event-driven/change-log"
 }

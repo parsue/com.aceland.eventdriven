@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using AceLand.EventDriven.Bus.Core;
 using UnityEngine;
-using ZLinq;
+using System.Linq;
 
 namespace AceLand.EventDriven.Bus.Services
 {
@@ -56,7 +55,7 @@ namespace AceLand.EventDriven.Bus.Services
 
                 if (map.ContainsKey(instance))
                 {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
                     Debug.LogWarning($"[EventBus] Instance of type {instance.GetType().Name} is already subscribed to {eventType.Name}. Ignoring duplicate subscription.");
 #endif
                     return; // Prevent duplicate subscription
@@ -130,9 +129,9 @@ namespace AceLand.EventDriven.Bus.Services
             {
                 if (_listeners.TryGetValue(eventType, out var existing))
                 {
-                    if (existing != null && existing.GetInvocationList().AsValueEnumerable().Contains(listener))
+                    if (existing != null && existing.GetInvocationList().Contains(listener))
                     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
                         Debug.LogWarning($"[EventBus] Delegate is already subscribed to {eventType.Name}. Ignoring duplicate subscription.");
 #endif
                         return; // Prevent duplicate subscription
@@ -156,9 +155,9 @@ namespace AceLand.EventDriven.Bus.Services
             {
                 if (_listeners.TryGetValue(eventType, out var existing))
                 {
-                    if (existing != null && existing.GetInvocationList().AsValueEnumerable().Contains(listener))
+                    if (existing != null && existing.GetInvocationList().Contains(listener))
                     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
                         Debug.LogWarning($"[EventBus] Delegate is already subscribed to {eventType.Name}. Ignoring duplicate subscription.");
 #endif
                         return; // Prevent duplicate subscription
@@ -193,11 +192,11 @@ namespace AceLand.EventDriven.Bus.Services
             _cache.WithCache(eventType, cache => { listener?.Invoke((TPayload)cache.EventData); });
         }
 
-        public void RaiseEvent(Type eventType, bool setCache)
+        public void RaiseEvent(Type eventType, CacheSpec? cacheSpec)
         {
             EventBus.EnsureIsEventInterface(eventType);
-            if (setCache)
-                _cache.SetCache(eventType, new EventCache(null));
+            if (cacheSpec.HasValue)
+                _cache.SetCache(eventType, cacheSpec.Value.ToCache(null));
             Delegate del;
             lock (_lock)
             {
@@ -205,13 +204,17 @@ namespace AceLand.EventDriven.Bus.Services
             }
 
             (del as Action)?.Invoke();
+
+#if UNITY_EDITOR
+            Diagnostics.EventMonitorBridge.NotifyRaise(eventType, null);
+#endif
         }
 
-        public void RaiseEvent<TPayload>(Type eventType, TPayload payload, bool setCache)
+        public void RaiseEvent<TPayload>(Type eventType, TPayload payload, CacheSpec? cacheSpec)
         {
             EventBus.EnsureIsEventInterface(eventType);
-            if (setCache)
-                _cache.SetCache(eventType, new EventCache(payload));
+            if (cacheSpec.HasValue)
+                _cache.SetCache(eventType, cacheSpec.Value.ToCache(payload));
             Delegate del;
             lock (_lock)
             {
@@ -219,47 +222,55 @@ namespace AceLand.EventDriven.Bus.Services
             }
 
             (del as Action<TPayload>)?.Invoke(payload);
+
+#if UNITY_EDITOR
+            Diagnostics.EventMonitorBridge.NotifyRaise(eventType, payload);
+#endif
         }
 
+#if UNITY_EDITOR
+        // Editor-only: number of listeners currently bound to an event.
+        internal int EditorGetListenerCount(Type eventType)
+        {
+            lock (_lock)
+            {
+                if (!_listeners.TryGetValue(eventType, out var del) || del is null) return 0;
+                return del.GetInvocationList().Length;
+            }
+        }
+
+        // Editor-only: per-listener info (method + target) for the monitor inspector.
+        internal System.Collections.Generic.List<Diagnostics.EventListenerInfo> EditorGetListeners(Type eventType)
+        {
+            var result = new System.Collections.Generic.List<Diagnostics.EventListenerInfo>();
+            Delegate del;
+            lock (_lock)
+            {
+                if (!_listeners.TryGetValue(eventType, out del) || del is null) return result;
+            }
+
+            foreach (var d in del.GetInvocationList())
+                result.Add(new Diagnostics.EventListenerInfo(d.Method, d.Target));
+
+            return result;
+        }
+#endif
+
+        // Uses the compile-time generated binder (instance => typed delegate).
+        // Zero reflection, IL2CPP-safe.
         private static Delegate BindInstanceDelegate(EventSignature sig, object instance)
         {
-            if (!sig.EventInterfaceType.IsAssignableFrom(instance.GetType()))
+            if (!sig.EventInterfaceType.IsInstanceOfType(instance))
                 throw new InvalidOperationException(
                     $"{instance.GetType().Name} does not implement {sig.EventInterfaceType.Name}.");
 
-            var targetMethod = ResolveImplementationMethod(instance.GetType(), sig.EventInterfaceType, sig.Method);
-
-            if (sig.Kind == EventSignatureKind.NoPayload)
-                return Delegate.CreateDelegate(typeof(Action), instance, targetMethod);
-            
-            var delegateType = typeof(Action<>).MakeGenericType(sig.PayloadTypeOrNull);
-            
-            return Delegate.CreateDelegate(delegateType, instance, targetMethod);
+            return sig.Binder(instance);
         }
 
-        private static MethodInfo ResolveImplementationMethod(Type concreteType, Type interfaceType,
-            MethodInfo interfaceMethod)
-        {
-            var map = concreteType.GetInterfaceMap(interfaceType);
-            for (var i = 0; i < map.InterfaceMethods.Length; i++)
-            {
-                if (map.InterfaceMethods[i] == interfaceMethod)
-                    return map.TargetMethods[i];
-            }
-
-            throw new MissingMethodException(
-                $"Cannot find implementation for {interfaceType.Name}.{interfaceMethod.Name} on {concreteType.Name}.");
-        }
-
+        // Uses the compile-time generated cache sender (typed invoke, no DynamicInvoke).
         private void SendCacheToDelegate(EventSignature sig, Delegate del)
         {
-            _cache.WithCache(sig.EventInterfaceType, cache =>
-            {
-                if (sig.Kind == EventSignatureKind.NoPayload)
-                    (del as Action)?.Invoke();
-                else
-                    del.DynamicInvoke(cache.EventData);
-            });
+            _cache.WithCache(sig.EventInterfaceType, cache => sig.CacheSender(del, cache.EventData));
         }
     }
 }
