@@ -27,6 +27,22 @@ and raise history live while you play.
   `KickStart()`.
 - **Least-privilege by design.** Signals expose narrow capability interfaces.
 
+## Why It's Different
+
+Most Unity event systems make you choose between convenience and safety. AceLand Event Driven refuses that trade-off:
+
+| | Typical string/enum event bus | Reflection-scanning frameworks | **AceLand Event Driven** |
+| --- | --- | --- | --- |
+| Type safety | ❌ magic strings, runtime failures | ⚠️ attributes, discovered late | ✅ **interfaces, compile-time checked** |
+| Startup cost | cheap but fragile | ❌ `AppDomain` scan + reflection | ✅ **zero reflection, source-generated** |
+| Domain-reload / CoreCLR | relies on reload | ❌ `ReflectionTypeLoadException` risk | ✅ **no reload reliance, Unity 7 ready** |
+| Late subscribers | manual bookkeeping | varies | ✅ **built-in sticky cache + `KickStart()`** |
+| Dependencies | varies | often heavy | ✅ **zero dependency** |
+
+Because registration is generated at **compile time**, the cost you'd normally pay at startup simply isn't there — and mistakes surface in your IDE, not in a play-test.
+
+> For the full API, Event Monitor walkthrough and best practices, see the package README and the official documentation.
+
 ## Package Info
 | | |
 | --- | --- |
