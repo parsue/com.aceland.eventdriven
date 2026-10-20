@@ -40,5 +40,30 @@ namespace AceLand.EventDriven.EventSignal.Core
             var key = signal.Id;
             signalsById.Remove(key);
         }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Editor-only: dispose and clear all registered signals.
+        /// In no-domain-reload play mode the static <see cref="signalsById"/> survives
+        /// between play sessions, so it must be cleared on (re)initialization to avoid
+        /// stale signals leaking across sessions. Player builds get a fresh static state
+        /// per process launch, so this is not compiled there.
+        /// </summary>
+        internal static void ClearAll()
+        {
+            if (signalsById.Count == 0) return;
+
+            // Snapshot and clear first so Dispose -> UnRegistrySignal becomes a no-op
+            // and we avoid mutating the dictionary while iterating.
+            var signals = new List<IEventSignal>(signalsById.Values);
+            signalsById.Clear();
+
+            foreach (var signal in signals)
+            {
+                if (signal is IDisposable disposable)
+                    disposable.Dispose();
+            }
+        }
+#endif
     }
 }
