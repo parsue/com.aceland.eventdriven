@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.1.1] - 2026-10-20
+### Fixed
+- [Signal] signals are now cleared and disposed on (re)initialization in the Editor, preventing stale signals from leaking across play sessions under no-domain-reload
+- [Signal] SignalLinker now only triggers listeners on the first evaluation or when its aggregated result actually changes, instead of on every adaptor change
+
+---
+
 ## [3.1.0] - 2026-10-19
 ### Added
 - [Bus] source-generated event registration (zero reflection scan at startup)
