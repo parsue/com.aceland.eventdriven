@@ -56,10 +56,10 @@ namespace AceLand.EventDriven.EventSignal.Core
             adaptor.AddAdaptor(signalListener, v => EqualityComparer<T>.Default.Equals(v, conditionValue) , Trigger);
         }
 
-        public void AddListener(Action<bool> listener, bool runImmediately = false)
+        public void AddListener(Action<bool> listener, bool kickStart = false)
         {
             _observers.AddListener(listener);
-            if (runImmediately) listener?.Invoke(GetResult());
+            if (kickStart) listener?.Invoke(GetResult());
         }
 
         public void RemoveListener(Action<bool> listener)

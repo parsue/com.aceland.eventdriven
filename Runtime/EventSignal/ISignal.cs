@@ -8,7 +8,7 @@ namespace AceLand.EventDriven.EventSignal
         void Dispose();
         bool Disposed { get; }
         
-        void AddListener(Action listener, bool runImmediately = false);
+        void AddListener(Action listener, bool kickStart = false);
         void RemoveListener(Action listener);
         void RemoveAllListeners();
         
@@ -22,7 +22,7 @@ namespace AceLand.EventDriven.EventSignal
         void Dispose();
         bool Disposed { get; }
         
-        void AddListener(Action<T> listener, bool runImmediately = false);
+        void AddListener(Action<T> listener, bool kickStart = false);
         void RemoveListener(Action<T> listener);
         void RemoveAllListeners();
         

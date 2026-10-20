@@ -9,10 +9,10 @@ namespace AceLand.EventDriven.EventSignal
         private readonly Observers _observers;
         private ISignal _refSignal;
 
-        public void AddListener(Action listener, bool runImmediately = false)
+        public void AddListener(Action listener, bool kickStart = false)
         {
             _observers.AddListener(listener);
-            if (runImmediately) listener?.Invoke();
+            if (kickStart) listener?.Invoke();
         }
 
         public void RemoveListener(Action listener)

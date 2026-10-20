@@ -20,10 +20,10 @@ namespace AceLand.EventDriven.EventSignal
             }
         }
 
-        public void AddListener(Action<T> listener, bool runImmediately = false)
+        public void AddListener(Action<T> listener, bool kickStart = false)
         {
             _observers.AddListener(listener);
-            if (runImmediately) listener?.Invoke(_value);
+            if (kickStart) listener?.Invoke(_value);
         }
 
         public void RemoveListener(Action<T> listener)

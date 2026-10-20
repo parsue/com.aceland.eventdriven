@@ -19,8 +19,8 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         public T Value => _refSignal.Value ?? default;
 
-        public void AddListener(Action<T> listener, bool runImmediately = false) =>
-            _refSignal.AddListener(listener, runImmediately);
+        public void AddListener(Action<T> listener, bool kickStart = false) =>
+            _refSignal.AddListener(listener, kickStart);
 
         public void RemoveListener(Action<T> listener) =>
             _refSignal.RemoveListener(listener);
