@@ -26,6 +26,7 @@ namespace AceLand.EventDriven.EventSignal.Core
         
         private readonly Dictionary<AdaptorOption, ISignalAdaptor> adaptors = new();
         private readonly Observers<bool> _observers = new();
+        private bool? _lastResult;
 
         public void AddAdaptor<T>(
             ISignalListener<T> signalListener,
@@ -73,7 +74,15 @@ namespace AceLand.EventDriven.EventSignal.Core
 
         public void Trigger()
         {
-            _observers.Trigger(GetResult());
+            var result = GetResult();
+
+            // Only notify observers on the first evaluation or when the computed
+            // result actually changes. Adaptor value changes that do not flip the
+            // linker's aggregated result should not re-trigger listeners.
+            if (_lastResult == result) return;
+
+            _lastResult = result;
+            _observers.Trigger(result);
         }
 
         private bool GetResult()
