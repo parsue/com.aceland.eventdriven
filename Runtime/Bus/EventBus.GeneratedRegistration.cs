@@ -43,5 +43,22 @@ namespace AceLand.EventDriven.Bus
 
         internal static IReadOnlyDictionary<Type, EventSignature> GeneratedSignatureStore
             => GeneratedSignatures;
+
+        /// <summary>
+        /// Thread-safe lookup into the process-lifetime generated store. Used as a
+        /// fallback by <see cref="Services.SignatureService"/> when a signature is not
+        /// present in its one-time snapshot, which happens when a generated per-assembly
+        /// bootstrap runs AFTER EventBus.Initialize() (the relative order of
+        /// [RuntimeInitializeOnLoadMethod] entries sharing the same load type is not
+        /// guaranteed by Unity). Reading under the lock avoids tearing against concurrent
+        /// __RegisterGeneratedEvent writes.
+        /// </summary>
+        internal static bool TryGetGeneratedSignature(Type eventType, out EventSignature signature)
+        {
+            lock (GeneratedSignaturesLock)
+            {
+                return GeneratedSignatures.TryGetValue(eventType, out signature);
+            }
+        }
     }
 }

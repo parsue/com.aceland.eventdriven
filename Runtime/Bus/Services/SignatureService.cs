@@ -36,7 +36,7 @@ namespace AceLand.EventDriven.Bus.Services
 
         public EventSignature GetOrThrowSignature(Type eventInterface)
         {
-            return _signatures.TryGetValue(eventInterface, out var sig)
+            return TryGetSignature(eventInterface, out var sig)
                 ? sig
                 : throw new InvalidOperationException(
                     $"Event interface {eventInterface.Name} is not registered. " +
@@ -45,7 +45,24 @@ namespace AceLand.EventDriven.Bus.Services
         }
 
         public bool TryGetSignature(Type eventInterface, out EventSignature signature)
-            => _signatures.TryGetValue(eventInterface, out signature);
+        {
+            if (_signatures.TryGetValue(eventInterface, out signature))
+                return true;
+
+            // Fallback: the one-time snapshot taken in InitializeFromGenerated() can miss
+            // signatures whose generated per-assembly bootstrap ran AFTER EventBus.Initialize().
+            // Unity does not guarantee ordering between [RuntimeInitializeOnLoadMethod] entries
+            // that share the same load type, so re-check the live process-lifetime store and
+            // promote any late arrival into the local snapshot.
+            if (EventBus.TryGetGeneratedSignature(eventInterface, out signature))
+            {
+                _signatures[eventInterface] = signature;
+                return true;
+            }
+
+            signature = default;
+            return false;
+        }
 
         public IReadOnlyCollection<EventSignature> Signatures => _signatures.Values;
     }

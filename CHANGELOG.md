@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.1.3] - 2026-11-21
+### Fixed
+- [Bus] event interface signature lookup now falls back to the process-lifetime generated store when missing from the one-time snapshot, fixing intermittent "Event interface X is not registered" failures caused by non-deterministic `[RuntimeInitializeOnLoadMethod]` ordering between per-assembly generated bootstraps and `EventBus.Initialize()` (affected builds, and the first play session / every domain+scene reload under no-domain-reload)
+
 ## [3.1.2] - 2026-11-21
 ### Added
 - [Profiler] per-event and per-signal ProfilerMarkers (editor/profiler builds only, guarded by `ENABLE_PROFILER`)
