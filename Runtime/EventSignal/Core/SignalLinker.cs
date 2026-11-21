@@ -11,6 +11,9 @@ namespace AceLand.EventDriven.EventSignal.Core
         private SignalLinker(string id)
         {
             Id = id;
+#if ENABLE_PROFILER
+            _observers.ProfilerScopeName = "AceLand.EventDriven.Signal." + id;
+#endif
         }
         
         ~SignalLinker() => Dispose();

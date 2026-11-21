@@ -28,6 +28,9 @@ namespace AceLand.EventDriven.EventSignal
             {
                 var id = _id ?? Guid.NewGuid().ToString();
                 var observers = new Observers<TValue>();
+#if ENABLE_PROFILER
+                observers.ProfilerScopeName = "AceLand.EventDriven.Signal." + id;
+#endif
                 var signal = new SignalObject<TValue>(id, observers, _value);
                 Signals.RegistrySignal(signal);
                 return signal;

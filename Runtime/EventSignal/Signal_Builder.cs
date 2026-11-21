@@ -33,6 +33,9 @@ namespace AceLand.EventDriven.EventSignal
             {
                 var id = _id ?? Guid.NewGuid().ToString();
                 var observers = new Observers();
+#if ENABLE_PROFILER
+                observers.ProfilerScopeName = "AceLand.EventDriven.Signal." + id;
+#endif
                 var signal = new SignalObject(id, observers);
                 Signals.RegistrySignal(signal);
                 return signal;

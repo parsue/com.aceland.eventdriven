@@ -55,7 +55,9 @@ namespace AceLand.EventDriven.Bus.Services
 
         public bool TryGetCache(Type eventType, out EventCache cache)
         {
+#if UNITY_EDITOR
             bool staleDropped;
+#endif
             lock (_lock)
             {
                 if (_eventCache.TryGetValue(eventType, out cache))
@@ -64,12 +66,16 @@ namespace AceLand.EventDriven.Bus.Services
 
                     // Binding target is gone: treat as no cache and drop the stale entry.
                     _eventCache.Remove(eventType);
+#if UNITY_EDITOR
                     staleDropped = true;
+#endif
                 }
+#if UNITY_EDITOR
                 else
                 {
                     staleDropped = false;
                 }
+#endif
 
                 cache = default;
             }

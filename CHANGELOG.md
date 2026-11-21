@@ -4,12 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.1.2] - 2026-11-21
+### Added
+- [Profiler] per-event and per-signal ProfilerMarkers (editor/profiler builds only, guarded by `ENABLE_PROFILER`)
+  - [Bus] raise dispatch is wrapped in `AceLand.EventDriven.Bus.<EventType>`, with each listener measured individually as `AceLand.EventDriven.Bus.<EventType>.<DeclaringType>.<Method>`
+  - [Signal] trigger dispatch is wrapped in `AceLand.EventDriven.Signal.<Id>`, with each listener measured as `AceLand.EventDriven.Signal.<Id>.<DeclaringType>.<Method>`
+  - markers are cached once (per event type, per signal id, per listener delegate) to preserve the Zero-GC dispatch path; no cost in player builds without the profiler
+
 ## [3.1.1] - 2026-10-20
 ### Fixed
 - [Signal] signals are now cleared and disposed on (re)initialization in the Editor, preventing stale signals from leaking across play sessions under no-domain-reload
 - [Signal] SignalLinker now only triggers listeners on the first evaluation or when its aggregated result actually changes, instead of on every adaptor change
-
----
 
 ## [3.1.0] - 2026-10-19
 ### Added
@@ -19,8 +24,6 @@ All notable changes to this project will be documented in this file.
 - [Editor] formal Licensing integration via LicenseBridge
 ### Modified
 - Converted to a zero-dependency Core Package (no runtime package dependencies)
-
----
 
 ## [3.0.0] - 2026-09-18
 ### Modified

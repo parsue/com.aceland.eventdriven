@@ -203,7 +203,23 @@ namespace AceLand.EventDriven.Bus.Services
                 _listeners.TryGetValue(eventType, out del);
             }
 
+#if ENABLE_PROFILER
+            if (del is Action action)
+            {
+                using (EventProfiler.BusScope(eventType, out var prefix).Auto())
+                {
+                    var list = action.GetInvocationList();
+                    for (var i = 0; i < list.Length; i++)
+                    {
+                        var listener = (Action)list[i];
+                        using (EventProfiler.Listener(prefix, listener).Auto())
+                            listener.Invoke();
+                    }
+                }
+            }
+#else
             (del as Action)?.Invoke();
+#endif
 
 #if UNITY_EDITOR
             Diagnostics.EventMonitorBridge.NotifyRaise(eventType, null);
@@ -221,7 +237,23 @@ namespace AceLand.EventDriven.Bus.Services
                 _listeners.TryGetValue(eventType, out del);
             }
 
+#if ENABLE_PROFILER
+            if (del is Action<TPayload> action)
+            {
+                using (EventProfiler.BusScope(eventType, out var prefix).Auto())
+                {
+                    var list = action.GetInvocationList();
+                    for (var i = 0; i < list.Length; i++)
+                    {
+                        var listener = (Action<TPayload>)list[i];
+                        using (EventProfiler.Listener(prefix, listener).Auto())
+                            listener.Invoke(payload);
+                    }
+                }
+            }
+#else
             (del as Action<TPayload>)?.Invoke(payload);
+#endif
 
 #if UNITY_EDITOR
             Diagnostics.EventMonitorBridge.NotifyRaise(eventType, payload);
