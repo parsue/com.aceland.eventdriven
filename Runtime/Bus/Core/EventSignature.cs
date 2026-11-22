@@ -17,12 +17,16 @@ namespace AceLand.EventDriven.Bus.Core
         /// <summary>instance =&gt; strongly-typed Action / Action&lt;T&gt; (no reflection).</summary>
         public Func<object, Delegate> Binder { get; }
 
-        /// <summary>(combinedDelegate, cacheData) =&gt; typed invoke (no DynamicInvoke).</summary>
-        public Action<Delegate, object> CacheSender { get; }
+        /// <summary>
+        /// (combinedDelegate, typedCachePayload) =&gt; typed invoke (no DynamicInvoke, no unbox).
+        /// The payload arrives as the strongly-typed <see cref="CachePayload{T}"/> boxed behind
+        /// <see cref="ICachePayload"/>; the generated sender reads its typed <c>Value</c> field.
+        /// </summary>
+        public Action<Delegate, ICachePayload> CacheSender { get; }
 
         public EventSignature(Type eventInterfaceType, string displayName, string description,
             EventSignatureKind kind, Type payloadTypeOrNull,
-            Func<object, Delegate> binder, Action<Delegate, object> cacheSender)
+            Func<object, Delegate> binder, Action<Delegate, ICachePayload> cacheSender)
         {
             EventInterfaceType = eventInterfaceType;
             DisplayName = displayName;

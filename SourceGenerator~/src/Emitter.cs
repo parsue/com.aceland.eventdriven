@@ -78,14 +78,14 @@ namespace AceLand.EventDriven.SourceGenerator
                 sb.AppendLine("                hasPayload: false,");
                 sb.AppendLine("                payloadType: null,");
                 sb.AppendLine($"                binder: static __instance => (System.Action)(({e.FullyQualifiedName})__instance).{e.MethodName},");
-                sb.AppendLine("                cacheSender: static (__del, __data) => ((System.Action)__del)?.Invoke());");
+                sb.AppendLine("                cacheSender: static (__del, __payload) => ((System.Action)__del)?.Invoke());");
             }
             else
             {
                 sb.AppendLine("                hasPayload: true,");
                 sb.AppendLine($"                payloadType: typeof({e.PayloadFqn}),");
                 sb.AppendLine($"                binder: static __instance => (System.Action<{e.PayloadFqn}>)(({e.FullyQualifiedName})__instance).{e.MethodName},");
-                sb.AppendLine($"                cacheSender: static (__del, __data) => ((System.Action<{e.PayloadFqn}>)__del)?.Invoke(({e.PayloadFqn})__data));");
+                sb.AppendLine($"                cacheSender: static (__del, __payload) => {{ if (__payload is global::AceLand.EventDriven.Bus.Core.CachePayload<{e.PayloadFqn}> __typed) ((System.Action<{e.PayloadFqn}>)__del)?.Invoke(__typed.Value); }});");
             }
         }
 

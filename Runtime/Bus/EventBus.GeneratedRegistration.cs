@@ -26,7 +26,7 @@ namespace AceLand.EventDriven.Bus
         public static void __RegisterGeneratedEvent(
             Type eventType, string displayName, string description,
             bool hasPayload, Type payloadType,
-            Func<object, Delegate> binder, Action<Delegate, object> cacheSender)
+            Func<object, Delegate> binder, Action<Delegate, ICachePayload> cacheSender)
         {
             if (eventType is null) throw new ArgumentNullException(nameof(eventType));
             if (binder is null) throw new ArgumentNullException(nameof(binder));

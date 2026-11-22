@@ -8,7 +8,7 @@ namespace AceLand.EventDriven.Bus
         public static EventRaiserBuilders.IEventRaiser<TEvent> Event<TEvent>() where TEvent : IBusEvent
         {
             EnsureIsEventInterface(typeof(TEvent));
-            return new EventRaiserBuilders.EventBusRaiser<TEvent>();
+            return EventRaiserBuilders.EventBusRaiser<TEvent>.Shared;
         }
 
         public static EventBusBuilders.IEventBusObjBuilder Event(object listenerInstance)

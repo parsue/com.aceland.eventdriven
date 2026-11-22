@@ -166,7 +166,7 @@ namespace AceLand.EventDriven.Bus.Services
                 if (!_eventCache.TryGetValue(eventType, out var cache) || !cache.IsValid())
                     return new Diagnostics.EventCacheInfo(false, CacheBinding.Persistent, "null");
 
-                var payload = cache.EventData;
+                var payload = cache.Payload?.BoxedValue;
                 var payloadString = Diagnostics.EventPayloadFormatter.Format(payload);
                 return new Diagnostics.EventCacheInfo(true, cache.Binding, payloadString);
             }

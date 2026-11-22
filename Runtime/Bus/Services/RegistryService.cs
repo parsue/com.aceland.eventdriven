@@ -189,7 +189,13 @@ namespace AceLand.EventDriven.Bus.Services
 
         public void SendCacheToDelegate<TPayload>(Type eventType, Action<TPayload> listener)
         {
-            _cache.WithCache(eventType, cache => { listener?.Invoke((TPayload)cache.EventData); });
+            // Typed read: the cache holds a CachePayload<TPayload>, so reading its Value
+            // field needs no unboxing for value-type payloads.
+            _cache.WithCache(eventType, cache =>
+            {
+                if (cache.Payload is CachePayload<TPayload> typed)
+                    listener?.Invoke(typed.Value);
+            });
         }
 
         public void RaiseEvent(Type eventType, CacheSpec? cacheSpec)
@@ -230,7 +236,7 @@ namespace AceLand.EventDriven.Bus.Services
         {
             EventBus.EnsureIsEventInterface(eventType);
             if (cacheSpec.HasValue)
-                _cache.SetCache(eventType, cacheSpec.Value.ToCache(payload));
+                _cache.SetCache(eventType, cacheSpec.Value.ToCache(new CachePayload<TPayload>(payload)));
             Delegate del;
             lock (_lock)
             {
@@ -302,7 +308,7 @@ namespace AceLand.EventDriven.Bus.Services
         // Uses the compile-time generated cache sender (typed invoke, no DynamicInvoke).
         private void SendCacheToDelegate(EventSignature sig, Delegate del)
         {
-            _cache.WithCache(sig.EventInterfaceType, cache => sig.CacheSender(del, cache.EventData));
+            _cache.WithCache(sig.EventInterfaceType, cache => sig.CacheSender(del, cache.Payload));
         }
     }
 }

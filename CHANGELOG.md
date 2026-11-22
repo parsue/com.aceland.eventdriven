@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.2.0] - 2026-11-22
+### Changed
+- [Bus] raise chain is now Zero-GC: `EventBus.Event<T>()` returns a per-closed-type singleton raiser and every subsequent builder (`WithData`, `WithCache`, `WithBinding`, `WithBindingScene`) is a `readonly struct`, so the `WithData(...).Raise()` hot path allocates nothing while preserving the covariant compile-time API shape
+- [Bus] cached event payloads are stored in a strongly-typed `CachePayload<T>` box behind `ICachePayload` instead of `object`, eliminating value-type boxing on `WithCache()` writes and on cache delivery (`KickStart` / late subscribe); the source-generated cache sender reads the typed `Value` field with no unbox
+
 ## [3.1.3] - 2026-11-21
 ### Fixed
 - [Bus] event interface signature lookup now falls back to the process-lifetime generated store when missing from the one-time snapshot, fixing intermittent "Event interface X is not registered" failures caused by non-deterministic `[RuntimeInitializeOnLoadMethod]` ordering between per-assembly generated bootstraps and `EventBus.Initialize()` (affected builds, and the first play session / every domain+scene reload under no-domain-reload)

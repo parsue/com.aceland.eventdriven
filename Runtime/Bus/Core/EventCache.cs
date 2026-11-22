@@ -5,7 +5,9 @@ namespace AceLand.EventDriven.Bus.Core
 {
     public readonly struct EventCache
     {
-        public readonly object EventData;
+        // Typed payload box (null for no-data events). Keeps the payload in a strongly
+        // typed field so value types are never boxed on write/read. See ICachePayload.
+        public readonly ICachePayload Payload;
         public readonly CacheBinding Binding;
 
         // GameObject binding target (null unless Binding == GameObject).
@@ -14,27 +16,27 @@ namespace AceLand.EventDriven.Bus.Core
         // Scene binding target (default unless Binding == Scene).
         private readonly Scene _boundScene;
 
-        public EventCache(object eventData)
-            : this(eventData, CacheBinding.Persistent, null, default)
+        public EventCache(ICachePayload payload)
+            : this(payload, CacheBinding.Persistent, null, default)
         {
         }
 
-        private EventCache(object eventData, CacheBinding binding, GameObject boundGameObject, Scene boundScene)
+        private EventCache(ICachePayload payload, CacheBinding binding, GameObject boundGameObject, Scene boundScene)
         {
-            EventData = eventData;
+            Payload = payload;
             Binding = binding;
             _boundGameObject = boundGameObject;
             _boundScene = boundScene;
         }
 
-        public static EventCache Persistent(object eventData) =>
-            new(eventData, CacheBinding.Persistent, null, default);
+        public static EventCache Persistent(ICachePayload payload) =>
+            new(payload, CacheBinding.Persistent, null, default);
 
-        public static EventCache BoundToGameObject(object eventData, GameObject target) =>
-            new(eventData, CacheBinding.GameObject, target, default);
+        public static EventCache BoundToGameObject(ICachePayload payload, GameObject target) =>
+            new(payload, CacheBinding.GameObject, target, default);
 
-        public static EventCache BoundToScene(object eventData, Scene scene) =>
-            new(eventData, CacheBinding.Scene, null, scene);
+        public static EventCache BoundToScene(ICachePayload payload, Scene scene) =>
+            new(payload, CacheBinding.Scene, null, scene);
 
         /// <summary>
         /// Lazily determines whether this cache entry is still valid against its binding target.

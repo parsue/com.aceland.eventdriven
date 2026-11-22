@@ -43,7 +43,7 @@ namespace AceLand.EventDriven.Bus.Core
             return new CacheSpec(CacheBinding.Scene, null, scene);
         }
 
-        public EventCache ToCache(object payload) => _binding switch
+        public EventCache ToCache(ICachePayload payload) => _binding switch
         {
             CacheBinding.GameObject => EventCache.BoundToGameObject(payload, _gameObject),
             CacheBinding.Scene => EventCache.BoundToScene(payload, _scene),

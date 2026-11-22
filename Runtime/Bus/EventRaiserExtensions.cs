@@ -1,5 +1,4 @@
-﻿using System;
-using AceLand.EventDriven.Bus.Builders;
+﻿using AceLand.EventDriven.Bus.Builders;
 
 namespace AceLand.EventDriven.Bus
 {
@@ -7,28 +6,19 @@ namespace AceLand.EventDriven.Bus
     {
         public static void Raise(this EventRaiserBuilders.IEventRaiser<IEvent> raiser)
         {
-            if (raiser is EventRaiserBuilders.IEventRaiserInternal internalRaiser)
-                internalRaiser.InternalRaise(null);
-            else
-                throw new InvalidOperationException("Invalid raiser implementation.");
+            EventBus.RaiseEvent(raiser.EventType, null);
         }
 
-        public static EventRaiserBuilders.IEventRaiserCacheBuilder WithCache(
+        public static EventRaiserBuilders.EventBusCacheBuilder WithCache(
             this EventRaiserBuilders.IEventRaiser<IEvent> raiser)
         {
-            if (raiser is EventRaiserBuilders.IEventRaiserInternal internalRaiser)
-                return internalRaiser.InternalWithCache();
-
-            throw new InvalidOperationException("Invalid raiser implementation.");
+            return new EventRaiserBuilders.EventBusCacheBuilder(raiser.EventType, Core.CacheSpec.Persistent);
         }
 
-        public static EventRaiserBuilders.IEventRaiserRaiseBuilder WithData<TData>(
+        public static EventRaiserBuilders.EventBusRaiserWithData<TData> WithData<TData>(
             this EventRaiserBuilders.IEventRaiser<IEvent<TData>> raiser, TData data)
         {
-            if (raiser is EventRaiserBuilders.IEventRaiserInternal internalRaiser)
-                return internalRaiser.InternalRaiseWithData(data);
-
-            throw new InvalidOperationException("Invalid raiser implementation.");
+            return new EventRaiserBuilders.EventBusRaiserWithData<TData>(raiser.EventType, data);
         }
     }
 }
